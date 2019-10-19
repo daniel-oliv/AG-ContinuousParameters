@@ -1,0 +1,168 @@
+<h1 class="rootTag container">Simple GA Example</h1>
+
+<button class="btn btn-primary" (click)="optimize()">Encontrar máximo/mínimo</button>
+<br>
+<br>
+<h6>Máximo da função no intervalo: {{maxFunctionInTheInterval}}</h6>
+<br>
+<h6>Mínimo da função no intervalo: {{minFunctionInTheInterval}}</h6>
+<br><br>
+<p-accordion [multiple]="true">
+	<p-accordionTab header="Configuração">
+		<div class=" row">
+			<div class="container col-sm" >
+				<br>
+				<h6>Probabilidade de Cruzamento: {{probCruzamento|number:'1.2-5'}}</h6>
+				<p-slider class="slider" [(ngModel)]="probCruzamento" 
+				[step]="0.01" [min]="0" [max]="1" 
+				[animate]="true" ></p-slider>
+				<br>
+				<h6>Probabilidade de Mutação: {{probMutacao|number:'1.2-5'}}</h6>
+				<p-slider class="slider" [(ngModel)]="probMutacao" 
+				[step]="0.01" [min]="0" [max]="1"
+				[animate]="true" ></p-slider>
+				<br>
+				<h6>Resolução: {{resolution}}</h6>
+				<p-slider class="slider" [(ngModel)]="resolution" 
+				[step]="2" [min]="5" [max]="20" 
+				[animate]="true" ></p-slider>
+				<br>
+				<h6>Tamanho da população: {{populationSize}}</h6>
+				<p-slider class="slider" [(ngModel)]="populationSize" 
+				[step]="2" [min]="2" [max]="100"
+				[animate]="true" ></p-slider>
+				
+				<br>
+				<br>
+				<br>
+				<div *ngFor="let variable of varConfigurations">
+					<h6>Variável: {{variable.name}}</h6>
+					<h6>Limite máximo do intervalo: {{variable.intervalMax}}</h6>
+					<p-slider class="slider" [(ngModel)]="variable.intervalMax" 
+					(onChange)="drawFunction()"
+					[step]="0.1" [min]="variable.intervalMin" [max]="50"
+					[animate]="true" ></p-slider>
+					<br>
+					<h6>Limite mínimo do intervalo: {{variable.intervalMin}}</h6>
+					<p-slider class="slider" [(ngModel)]="variable.intervalMin" 
+					(onChange)="drawFunction()"
+					[step]="0.1" [min]="-50" [max]="variable.intervalMax"
+					[animate]="true" ></p-slider>
+					<br>
+
+				</div>
+				<br><br><br>
+				</div>
+				<div class="container col-sm-1" ></div>
+				<div class="container col-sm" >
+				<h6>Número de gerações: {{maxNumOfGenerations}}</h6>
+				<p-slider class="slider" [(ngModel)]="maxNumOfGenerations" 
+				[step]="1" [min]="0" [max]="200" 
+				[animate]="true" ></p-slider>
+				<br>
+				<h6>Número de indivíduos na lista dos melhores: {{numOfBestToKeep}}</h6>
+				<p-slider class="slider" [(ngModel)]="numOfBestToKeep" 
+				[step]="1" [min]="0" [max]="200" 
+				[animate]="true" ></p-slider>
+				
+				<br><br>
+				<h5>Modo de seleção de casais</h5>
+				
+				<p-radioButton label="Roleta" name="groupname" value="Roleta" [(ngModel)]="couplesSelectionMode">Roleta</p-radioButton>
+				<br><br>
+				<p-radioButton label="Torneio" name="groupname" value="Torneio" [(ngModel)]="couplesSelectionMode">Torneio</p-radioButton>
+				<br>
+				<br>
+				<h6>Indivíduos por torneio: {{numOfIndividualsInTourney}}</h6>
+				<p-slider class="slider" [(ngModel)]="numOfIndividualsInTourney" 
+				[step]="1" [min]="1" [max]="populationSize" 
+				[animate]="true" ></p-slider>
+				<br>
+				<br>
+				<br>
+				<p-checkbox label="Habilitar elistismo" name="groupname" value="elitism" [(ngModel)]="checkBoxSelectedItens"></p-checkbox>
+				<br>
+				<br>
+				<h6>Indivíduos preservados por elitismo: {{numOfElitismInd}}</h6>
+				<p-slider class="slider" [(ngModel)]="numOfElitismInd" 
+				[step]="2" [min]="0" [max]="populationSize" 
+				[animate]="true" ></p-slider>
+				<br>
+				<br>
+				<h6>Número de cortes no crossover: {{numOfCuts}}</h6>
+				<div class="smallSlider">
+				<p-slider class="slider" [(ngModel)]="numOfCuts" 
+				[step]="1" [min]="1" [max]="2" 
+				[animate]="true" ></p-slider>
+				</div>
+				
+
+				<br><br><br>            
+			</div>    
+			<div class="container col-sm-1" ></div>  
+		</div>
+	</p-accordionTab>
+	<p-accordionTab header="Function Graph" [selected]="true">
+		<h2 class="rootTag container">Function Graph</h2>
+		<div class="chartDiv">
+			<div id="3dGraph" style="width: 100%; height: 500px;"></div>
+			<!--<p-chart [style.display]="showGraph2" type="line" [data]="graphData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>-->
+		</div>
+	</p-accordionTab>
+	<p-accordionTab header="Curva de desempenho" [selected]="false">
+		<h2 class="rootTag container">Curva de desempenho</h2>
+		<div class="chartDiv">
+			<p-chart [style.display]="'block'" type="line" [data]="performanceData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>
+			<!--<p-chart [style.display]="showGraph2" type="line" [data]="graphData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>-->
+		</div>
+		<h2 class="rootTag container">Fitness do melhor indivíduo</h2>
+		<div class="chartDiv">
+			<p-chart [style.display]="'block'" type="line" [data]="bestIndividualData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>
+			<!--<p-chart [style.display]="showGraph2" type="line" [data]="graphData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>-->
+		</div>
+	</p-accordionTab>
+	<p-accordionTab header="Tabelas">
+			<p-table [value]="bestInd" class="table table-dark">
+					<ng-template pTemplate="header">
+						<tr>
+							<th>x1</th>
+							<th>x2</th>
+							<th>f(x1, x2)</th>
+							<th>Generation</th>
+						</tr>
+					</ng-template>
+					<ng-template pTemplate="body" let-indiv>
+						<tr>
+							<td>{{indiv.variables[0].realNumber}}</td>
+							<td>{{indiv.variables[1].realNumber}}</td>
+							<td>{{functionToAnalise(indiv.variables)}}</td>
+							<td>{{indiv.generation}}</td>
+						</tr>
+					</ng-template>
+				</p-table>
+				<br><br>
+				<p-table [value]="generations">
+					<ng-template pTemplate="header">
+						<tr>
+							<th>Generation</th>
+							<th>Best</th>
+							<th>Average</th>
+						</tr>
+					</ng-template>
+					<ng-template pTemplate="body" let-genArray>
+						<tr>
+							<td>{{generations.indexOf(genArray)}}</td>
+							<td>{{genArray[genArray.length-1].fitness}}</td>
+							<td>{{calcFitnessAverage(genArray)}}</td>
+						</tr>
+					</ng-template>
+			</p-table>  
+	</p-accordionTab>
+</p-accordion>
+
+
+
+
+
+
+
