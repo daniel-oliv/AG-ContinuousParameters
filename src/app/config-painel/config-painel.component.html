@@ -22,11 +22,6 @@
 				[step]="0.01" [min]="0" [max]="1"
 				[animate]="true" ></p-slider>
 				<br>
-				<h6>Resolução: {{resolution}}</h6>
-				<p-slider class="slider" [(ngModel)]="resolution" 
-				[step]="2" [min]="5" [max]="20" 
-				[animate]="true" ></p-slider>
-				<br>
 				<h6>Tamanho da população: {{populationSize}}</h6>
 				<p-slider class="slider" [(ngModel)]="populationSize" 
 				[step]="2" [min]="2" [max]="100"
@@ -52,9 +47,9 @@
 
 				</div>
 				<br><br><br>
-				</div>
-				<div class="container col-sm-1" ></div>
-				<div class="container col-sm" >
+			</div>
+			<div class="container col-sm-1" ></div>
+			<div class="container col-sm" >
 				<h6>Número de gerações: {{maxNumOfGenerations}}</h6>
 				<p-slider class="slider" [(ngModel)]="maxNumOfGenerations" 
 				[step]="1" [min]="0" [max]="200" 
@@ -89,13 +84,21 @@
 				[animate]="true" ></p-slider>
 				<br>
 				<br>
-				<h6>Número de cortes no crossover: {{numOfCuts}}</h6>
-				<div class="smallSlider">
-				<p-slider class="slider" [(ngModel)]="numOfCuts" 
-				[step]="1" [min]="1" [max]="2" 
-				[animate]="true" ></p-slider>
-				</div>
+				<h5>Modo de mutação</h5>
 				
+				<p-radioButton label="Individuo" name="mutationMode" value="Individuo" [(ngModel)]="mutationMode">Uma por indivíduo</p-radioButton>
+				<br><br>
+				<p-radioButton label="Gene" name="mutationMode" value="Gene" [(ngModel)]="mutationMode">Para cada gene</p-radioButton>
+				<br>
+				<br>
+				
+				<h5>Método de crossover</h5>
+				
+				<p-radioButton label="Radcliff" name="crossoverMode" value="Radcliff" [(ngModel)]="couplesSelectionMode">Radcliff</p-radioButton>
+				<br><br>
+				<p-radioButton label="Wright" name="crossoverMode" value="Wright" [(ngModel)]="couplesSelectionMode">Wright</p-radioButton>
+				<br>
+				<br>
 
 				<br><br><br>            
 			</div>    
@@ -133,9 +136,9 @@
 					</ng-template>
 					<ng-template pTemplate="body" let-indiv>
 						<tr>
-							<td>{{indiv.variables[0].realNumber}}</td>
-							<td>{{indiv.variables[1].realNumber}}</td>
-							<td>{{functionToAnalise(indiv.variables)}}</td>
+							<td>{{indiv.chromosome[0]}}</td>
+							<td>{{indiv.chromosome[1]}}</td>
+							<td>{{functionToAnalise(indiv.chromosome)}}</td>
 							<td>{{indiv.generation}}</td>
 						</tr>
 					</ng-template>

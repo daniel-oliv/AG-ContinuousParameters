@@ -11,7 +11,7 @@ declare var Plotly: any;
 export class ConfigPainelComponent implements OnInit {
   probMutacao: number;
   probCruzamento: number;
-  resolution: number;
+  graphResolution: number;
   populationSize: number;
   
   varConfigurations: VarConfiguration[];
@@ -30,11 +30,11 @@ export class ConfigPainelComponent implements OnInit {
   numCurrentGeneration: number;
   generations: any[];
   couplesSelectionMode: string;
+  mutationMode: string;
+  crossoverMode: string;
   checkBoxSelectedItens: string[];
   numOfIndividualsInTourney: number;
   numOfElitismInd: number;
-  numOfCuts: number;
-
   //graphData: any;
   //functionDataSet: any;
   //generationsDataSets: any[];
@@ -62,24 +62,10 @@ export class ConfigPainelComponent implements OnInit {
     this.probCruzamento = 0.6;
     this.probMutacao = 0.01;
     this.numOfVariables = 2;
-    this.resolution = 10;
-    console.log("totalResolution: ", this.totalResolution);
+    this.graphResolution = 10;
     this.populationSize = 50;
-    this.numOfCuts = 1;
     
-    let x1Config: VarConfiguration = {
-      name: 'x1',
-      intervalMin: -3.1,
-      intervalMax: 12.1
-    }
-
-    let x2Config: VarConfiguration = {
-      name: 'x2',
-      intervalMin: 4.1,
-      intervalMax: 5.8
-    }
-    ///update numOfVariables
-    this.varConfigurations = [x1Config, x2Config];
+    this.initConfigVars();
 
     this.maxNumOfGenerations = 70;
     this.bestInd = [];
@@ -92,9 +78,25 @@ export class ConfigPainelComponent implements OnInit {
     //this.initGensDataset();
     this.drawFunction();
     this.couplesSelectionMode = "Roleta";
+    this.mutationMode = "Gene";
+    this.crossoverMode = "Radcliff";
     this.checkBoxSelectedItens = ["elitism"];
     this.numOfIndividualsInTourney = 4;
     this.numOfElitismInd = 2;
+  }
+
+  initConfigVars()
+  {
+    this.varConfigurations = [];
+    for (let i = 0; i < this.numOfVariables; i++) 
+    {
+      let xConfig: VarConfiguration = {
+        name: 'x'+i,
+        intervalMin: 0,
+        intervalMax: 10
+      }
+      this.varConfigurations.push(xConfig);
+    }
   }
 
   numOfNewIndividual() 
@@ -134,10 +136,10 @@ export class ConfigPainelComponent implements OnInit {
       this.getIntervalLabels(varConfig)
     }
 
-    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=25) 
+    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=5) 
     {
       let x1 = this.varConfigurations[0].xRealValues[ix1];
-      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=25)
+      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=5)
       {
         let x2 = this.varConfigurations[1].xRealValues[ix2];
         this.x1GraphValues.push(x1);
@@ -607,15 +609,15 @@ export class ConfigPainelComponent implements OnInit {
   }
 
   crossIndividuals(couple: individual[]): individual[] {
-    switch (this.numOfCuts) 
+    switch (this.crossoverMode) 
     {
-      case 1:
+      case 'Radcliff':
         //console.log("crossIndividuals 1 cut");
-        return this.crossSingleCut(couple);
+        return this.radcliffCrossover(couple);
         break;
-      case 2:
+      case 'Wright':
         //console.log("crossIndividuals 2 cuts");
-        return this.crossDoubleCut(couple);
+        return this.wrightCrossover(couple);
         break;
       default:
         //console.log("selectCouples default");
@@ -624,57 +626,32 @@ export class ConfigPainelComponent implements OnInit {
     }
   }
 
-  crossSingleCut(couple: individual[]): individual[] {
-    //console.log("crossIndividuals couple: ");
-    //couple.forEach((indiv)=>console.log(indiv.chromosome));
+  radcliffCrossover(couple: individual[])
+  {
     let newIndividuals: individual[] = [];
+    let beta: number;
     let newChromosome: number[] = [];
-
-    ///Math.floor(Math.random()*(this.resolution - 1)) 0 to 8 - +=1 1 to 9
-    let indexToCross: number =
-      Math.floor(Math.random() * (this.totalResolution - 1)) + 1; /// 1 to 9 (pos entre os bits)
-    //console.log("crossIndividuals indexToCross: " + indexToCross);
-
-    newChromosome = couple[0].chromosome
-      .slice(0, indexToCross)
-      .concat(couple[1].chromosome.slice(indexToCross, this.totalResolution));
-    let ind1: individual = this.getIndividual(newChromosome);
-    newIndividuals.push(ind1);
-    //console.log("crossIndividuals ind1: " + ind1.chromosome);
-
-    newChromosome = couple[1].chromosome
-      .slice(0, indexToCross)
-      .concat(couple[0].chromosome.slice(indexToCross, this.totalResolution));
-    let ind2: individual = this.getIndividual(newChromosome);
-    newIndividuals.push(ind2);
-    //console.log("crossIndividuals ind2: " + ind2.chromosome);
+    let newValue: number;
+    for (let i = 0; i < this.numOfVariables; i++) {
+      beta = Math.random();
+      newChromosome.push( beta * couple[0].chromosome[i] + (1-beta) * couple[1].chromosome[i]);
+    }
+    newIndividuals.push( this.getIndividual(newChromosome) );
+    
+    newChromosome.length = 0;
+    for (let i = 0; i < this.numOfVariables; i++) {
+      beta = Math.random();
+      newChromosome.push( (1-beta) * couple[1].chromosome[i] + beta * couple[0].chromosome[i]);
+    }
+    newIndividuals.push( this.getIndividual(newChromosome) );
 
     return newIndividuals;
   }
 
-  crossDoubleCut(couple: individual[]): individual[] {
-    //console.log("crossIndividuals couple: ");
-    //couple.forEach((indiv)=>console.log(indiv.chromosome));
+  ///////TODO
+  wrightCrossover(couple: individual[])
+  {
     let newIndividuals: individual[] = [];
-    let newChromosome: number[] = [];
-    let indexesToCut: number[] = this.getBalancedIndexesToCut(); 
-    ///Math.floor(Math.random()*(this.resolution - 1)) 0 to 8 - +=1 1 to 9
-
-    newChromosome = 
-              couple[0].chromosome.slice(0, indexesToCut[0])
-      .concat(couple[1].chromosome.slice(indexesToCut[0], indexesToCut[1]))
-      .concat(couple[0].chromosome.slice(indexesToCut[1], this.totalResolution));
-    let ind1: individual = this.getIndividual(newChromosome);
-    newIndividuals.push(ind1);
-    //console.log("crossIndividuals ind1: " + ind1.chromosome);
-
-    newChromosome = 
-              couple[1].chromosome.slice(0, indexesToCut[0])
-      .concat(couple[0].chromosome.slice(indexesToCut[0], indexesToCut[1]))
-      .concat(couple[1].chromosome.slice(indexesToCut[1], this.totalResolution));
-    let ind2: individual = this.getIndividual(newChromosome);
-    newIndividuals.push(ind2);
-    //console.log("crossIndividuals ind2: " + ind2.chromosome);
 
     return newIndividuals;
   }
@@ -711,81 +688,80 @@ export class ConfigPainelComponent implements OnInit {
     return ordered;
   }
 
-  getIndexesToCut(): number[]
-  {
-    let indexesToCut: number[] = []; 
-    let indexToCut: number;
-    while(indexesToCut.length < this.numOfCuts)
-    {
-      indexToCut =
-          Math.floor(Math.random() * (this.totalResolution - 1)) + 1; /// 1 to 19 (pos entre os bits)
-
-      if( !indexesToCut.includes(indexToCut))
-      {
-        //console.log("Contains: " + indexToCut);
-        indexesToCut.push(indexToCut);
-      }
-      
-    }
-    indexesToCut = this.getAscendingArray(indexesToCut)
-    //console.log("indexes: ", indexesToCut);
-    
-    return indexesToCut;
-  }
-
-  ///return one number between 1 and 9 and another between 11 and 19, for being sure of cutting both x1 and x2
-  getBalancedIndexesToCut(): number[]
-  {
-    let indexesToCut: number[] = []; 
-    let indexToCut: number;
-    while(indexesToCut.length < this.numOfCuts)
-    {
-      indexToCut =
-          Math.floor(Math.random() * (this.resolution - 1)) + 1; /// 1 to 9 (pos entre os bits)
-
-      if( !indexesToCut.includes(indexToCut))
-      {
-        //console.log("Contains: " + indexToCut);
-        indexesToCut.push(indexToCut);
-      }
-    }
-    indexesToCut[1] += 10;
-    //console.log("indexes: ", indexesToCut);
-
-    return indexesToCut;
-  }
-
-  get totalResolution(): number
-  {
-    return this.resolution * this.numOfVariables;
-  }
-
   applyMutation(population: individual[]) 
   {
+    let newChromosome;
     let mutationApplied = false;
     //console.log("applyMutation");
     for (let j = 0; j < population.length; j++) 
     {
       let indiv = population[j];
-      mutationApplied = false;
-      for (let k = 0; k < indiv.chromosome.length; k++) 
+      newChromosome = indiv.chromosome.concat();;
+      switch (this.mutationMode) 
+      {
+        case "Gene":
+          //console.log("applyMutation Gene");
+          mutationApplied = this.tryMutationInGenes(newChromosome);
+          break;
+        case "Individuo":
+          //console.log("applyMutation tryOneMutation");
+          mutationApplied = this.tryOneMutation(newChromosome);
+          break;
+        default:
+          //console.log("applyMutation default");
+          return null;
+          break;
+      }
+
+      if (mutationApplied) 
+      {
+        population.splice(j, 1, this.getIndividual(newChromosome));
+      } 
+    }
+  }
+
+  tryMutationInGenes(newChromosome: number[]): boolean
+  {
+    let mutationApplied = false;
+    for (let varIndex = 0; varIndex < newChromosome.length; varIndex++) 
       {
         if (Math.random() < this.probMutacao) 
         {
           //console.log("mutation in individual " + j + " chromosome " + k);
           mutationApplied = true;
-          //console.log("before mutation" + indiv.chromosome[k]);
-          if (indiv.chromosome[k] === 1) indiv.chromosome[k] = 0;
-          //if(indiv.chromosome[k] === 0)
-          else indiv.chromosome[k] = 1;
-          //console.log("after mutation" + indiv.chromosome[k]);
+          //console.log("before mutation" + indiv.chromosome[k].concat());
+          newChromosome[varIndex] = this.getRandomVarValue(varIndex);
+          //console.log("after mutation" + indiv.chromosome[k].concat());
         }
       }
-      if (mutationApplied) 
-      {
-        population.splice(j, 1, this.getIndividual(indiv.chromosome));
-      }
+      return mutationApplied;
+  }
+
+  tryOneMutation(chromosome: number[]): boolean
+  {
+    if (Math.random() < this.probMutacao)
+    {
+      let mutationIndex = this.getRamdomInt(this.numOfVariables);
+      chromosome[mutationIndex] = this.getRandomVarValue(mutationIndex);
+      return true;
     }
+    return false;
+  }
+
+  getRandomVarValue(varIndex: number)
+  {
+    let varConfig = this.varConfigurations[varIndex];
+    return this.getRamdomReal(varConfig.intervalMax - varConfig.intervalMin) - varConfig.intervalMin;
+  }
+
+  getRamdomReal(maxExclusive: number)
+  {
+    return Math.random() * maxExclusive;
+  }
+
+  getRamdomInt(maxExclusive: number)
+  {
+    return Math.floor(Math.random() * maxExclusive);
   }
 
   selectIndividual(ci: number[]): number {
@@ -813,6 +789,11 @@ export class ConfigPainelComponent implements OnInit {
     //return xValues;
   }
 
+  getDecimalMax() /// be careful changing resolution
+  {
+    return Math.pow(2, this.graphResolution);
+  }
+
   selectInitialPopulation(): individual[] {
     let currentGeneration: individual[] = [];
     for (let i = 0; i < this.populationSize; i++) 
@@ -820,36 +801,19 @@ export class ConfigPainelComponent implements OnInit {
       //console.log("selectInitialPopulation: " + i);
       currentGeneration.push(
         ///note that we passe the bigChromossome size 2 * 10bits = 20bits 
-        this.getIndividual(this.getRandomChromosome(this.totalResolution))
+        this.getIndividual(this.getRandomChromosome())
       );
     }
 
-    /*
-    let bits = [1,1,1,1,1,1,1,1,1,1]
-    this.binArrayToDecimal(bits);
-    this.wholeToReal( this.binArrayToDecimal(bits));
-
-    for(let i = 0; i < this.populationSize; i++)
-    {
-      this.wholeToReal( this.binArrayToDecimal(currentGeneration[i]));
-    }
-    */
     return currentGeneration;
   }
 
   getIndividual(bigChromosome: number[]): individual {
     //console.log("getIndividual");
     let ind: individual = {  };
-    ind.chromosome = bigChromosome;
-    ind.variables = [];
-    let chromosomes = this.splitArray(bigChromosome, this.varConfigurations.length);
-    for(const varIndex in this.varConfigurations)
-    {
-      let variable: Variable = this.getVariable(chromosomes[varIndex], this.varConfigurations[varIndex]);
-      ind.variables.push(variable)
-    }
+    ind.chromosome = bigChromosome.concat();
     
-    ind.fitness = this.calcFitness(ind.variables);
+    ind.fitness = this.calcFitness(ind.chromosome);
 
     ///getting the best individuals
     this.evaluateIndividual(ind);
@@ -916,27 +880,28 @@ export class ConfigPainelComponent implements OnInit {
   hasIndividual(indiv: individual) 
   {
     let containsInd = false;
+    /////// change if was more than 2 vars
     for (const oneOfTheBest of this.bestInd) {
-      if(oneOfTheBest.variables[0].realNumber == indiv.variables[0].realNumber && /////x1 
-         oneOfTheBest.variables[1].realNumber == indiv.variables[1].realNumber )  /////x2
+      if(oneOfTheBest.chromosome[0] == indiv.chromosome[0] && /////x1 
+         oneOfTheBest.chromosome[1] == indiv.chromosome[1] )  /////x2
          return true;
     }
     return containsInd;
   }
 
-  getRandomChromosome(resolution: number) 
+  getRandomChromosome() 
   {
     let chromosome = [];
     /// select 1 and 0 at random to get the binary number
-    for (let i = 0; i < resolution; i++)
-      chromosome.push(Math.round(Math.random()));
+    for (let i = 0; i < this.numOfVariables; i++)
+      chromosome.push(this.getRandomVarValue(i));
 
     //console.log("getRandomChromosome: " + chromosome);
 
     return chromosome;
   }
 
-  calcFitness(variables: Variable[]) 
+  calcFitness(chromosome: number[]) 
   {
     ///trab 02 funcion
     /// fitness was set as -f+c, since -f grows when f is minimized
@@ -948,13 +913,13 @@ export class ConfigPainelComponent implements OnInit {
     
     ///considering 0 to 1
     /// and that minFunctionInTheInterval is a negative number
-    return (this.functionToAnalise(variables) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
+    return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
   }
 
-  functionToAnalise(variables: Variable[]): number 
+  functionToAnalise(chromosome: number[]): number 
   {
-    const x1: number = variables[0].realNumber;
-    const x2: number = variables[1].realNumber;
+    const x1: number = chromosome[0];
+    const x2: number = chromosome[1];
     return this.functionToAnaliseNuns(x1, x2);
   }
 
@@ -974,11 +939,14 @@ export class ConfigPainelComponent implements OnInit {
     ///https://academo.org/demos/3d-surface-plotter/?expression=21.5%2Bx*sin(4*pi*x)%2By*sin(20*pi*y)&xRange=-3.1%2C+12.1&yRange=4.1%2C+5.8&resolution=25
     ///=21.5+A2*SIN(4 *PI()*A2)+B2*SIN(20*PI()*B2)
     ///=21,5+A2*SIN(4 *PI()*A2)+B2*SIN(20*PI()*B2)
-    return 21.5 + x1 * Math.sin(4 * Math.PI * x1) + x2 * Math.sin(20 * Math.PI * x2);
+    /////return 21.5 + x1 * Math.sin(4 * Math.PI * x1) + x2 * Math.sin(20 * Math.PI * x2);
 
 
-    ///trab 08 function
-    
+    ///trab 08 function 01
+    return x1 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
+
+    ///trab 08 function 02
+    //return 20 + x1 * x1 + x2 * x2 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
   }
 
   binArrayToDecimal(bits: number[])   
@@ -1001,11 +969,6 @@ export class ConfigPainelComponent implements OnInit {
     return realNumber;
   }
 
-  getDecimalMax() /// be careful changing resolution
-  {
-    return Math.pow(2, this.resolution);
-  }
-
   calcFitnessAverage(generation: individual[]): number {
     let averageFit: number = 0;
     generation.forEach(element => {
@@ -1015,30 +978,12 @@ export class ConfigPainelComponent implements OnInit {
     return averageFit;
   }
 
-  getVariable(chromosome: number[], varConfig: VarConfiguration): Variable
-  {
-    let variable: Variable = { chromosome };
-    variable.realNumber = this.wholeToReal(this.binArrayToDecimal(variable.chromosome) + 1, varConfig.intervalMin, varConfig.intervalMax); 
-    return variable;
-  }
-
   /////////////////////
 }
 
-
-
-interface Variable {
-  chromosome: number[];
-  ///x real value
-  realNumber?: number;
-}
-
 interface individual {
-  ///the chromosome representing all the variables
+  ///the chromosome representing all the variables - now containing real numbers
   chromosome?: number[];
-
-  ///vector containing the x1 and x2 values (real and binary formats)
-  variables?: Variable[];
   
   ///indicates how much the the individual is good (generally is f(x)+c)
   fitness?: number;
