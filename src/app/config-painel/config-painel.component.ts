@@ -898,7 +898,7 @@ export class ConfigPainelComponent implements OnInit {
     //console.log("getIndividual");
     let ind: individual = {  };
     ind.chromosome = chromosome.concat();
-    
+    ind.fxn = this.functionToAnalise(ind.chromosome);
     ind.fitness = this.calcFitness(ind.chromosome);
 
     ///getting the best individuals
@@ -1077,6 +1077,8 @@ interface individual {
   ///the chromosome representing all the variables - now containing real numbers
   chromosome?: number[];
   
+  fxn?: number;
+
   ///indicates how much the the individual is good (generally is f(x)+c)
   fitness?: number;
 

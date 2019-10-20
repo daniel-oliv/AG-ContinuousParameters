@@ -146,7 +146,7 @@
 					<ng-template pTemplate="body" let-indiv>
 						<tr>
 							<td *ngFor="let varValue of indiv.chromosome">{{varValue}}</td>
-							<td>{{functionToAnalise(indiv.chromosome)}}</td>
+							<td>{{indiv.fxn}}</td>
 							<td>{{indiv.generation}}</td>
 						</tr>
 					</ng-template>
