@@ -830,7 +830,7 @@ export class ConfigPainelComponent implements OnInit {
   getRandomVarValue(varIndex: number)
   {
     let varConfig = this.varConfigurations[varIndex];
-    return this.getRamdomReal(varConfig.intervalMax - varConfig.intervalMin) - varConfig.intervalMin;
+    return this.getRamdomReal(varConfig.intervalMax - varConfig.intervalMin) + varConfig.intervalMin;
   }
 
   getRamdomReal(maxExclusive: number)
