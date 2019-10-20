@@ -52,6 +52,10 @@ export class ConfigPainelComponent implements OnInit {
   showGraph2: string;
   performanceData: any;
   bestIndividualData: any;
+  wrightChildrenHistogram: number[];
+  wrightExpressions: any[];
+
+  fitnessConstant: number;
 
   constructor() {}
 
@@ -83,6 +87,19 @@ export class ConfigPainelComponent implements OnInit {
     this.checkBoxSelectedItens = ["elitism"];
     this.numOfIndividualsInTourney = 4;
     this.numOfElitismInd = 2;
+    
+    this.wrightExpressions = [
+      (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 0.5 * valueP2},
+      (valueP1: number, valueP2: number) => {return 1.5 * valueP1 - 0.5 * valueP2},
+      (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 1.5 * valueP2}
+    ]
+
+    this.fitnessConstant = this.calcFitnessConstant();
+  }
+
+  calcFitnessConstant(): number
+  {
+    return 11.1;
   }
 
   initConfigVars()
@@ -91,7 +108,7 @@ export class ConfigPainelComponent implements OnInit {
     for (let i = 0; i < this.numOfVariables; i++) 
     {
       let xConfig: VarConfiguration = {
-        name: 'x'+i,
+        name: 'x'+(i+1),
         intervalMin: 0,
         intervalMax: 10
       }
@@ -369,7 +386,12 @@ export class ConfigPainelComponent implements OnInit {
     ///restarting the variables
 
     //this.initGensDataset();
+    this.initConfigVars();
+    this.fitnessConstant = this.calcFitnessConstant();
+
     this.drawFunction();
+
+    this.wrightChildrenHistogram = [0, 0, 0];
 
     this.generations = [];
 
@@ -431,7 +453,7 @@ export class ConfigPainelComponent implements OnInit {
     ///////}
     this.plotPerformanceGraph(this.generations);
     //this.generationsDataSets.push(this.getDataSetGeneration(this.generations[0]));
-
+    console.log(this.wrightChildrenHistogram);
     //console.log(this.generations);
   }
 
@@ -652,8 +674,65 @@ export class ConfigPainelComponent implements OnInit {
   wrightCrossover(couple: individual[])
   {
     let newIndividuals: individual[] = [];
+    let newChromosome: number[] = [];
+    let varValue: number;
 
-    return newIndividuals;
+    for (const wrightExp of this.wrightExpressions) {
+      for (let i = 0; i < this.numOfVariables; i++) {
+        varValue = wrightExp(couple[0].chromosome[i], couple[1].chromosome[i]);
+        //console.log("varValue", varValue);
+        if(this.isInsideInterval(i, varValue))
+        {
+          newChromosome.push(varValue);
+        }
+        else
+        {
+          newChromosome.push(this.getRandomArrayElement(couple).chromosome[i]);
+        }
+      }
+      newIndividuals.push( this.getIndividual(newChromosome) );
+      newChromosome.length = 0;
+    }
+    //console.log("wrightCrossover newIndividuals ", newIndividuals.concat());
+    let selectedInd = this.getTheBestIndividuos(newIndividuals, 2);
+
+    this.mountWrightHistogram(newIndividuals, selectedInd);
+
+    //console.log("wrightCrossover selectedInd ", selectedInd.concat());
+    return selectedInd;
+  }
+
+  isInsideInterval(varIndex, varValue)
+  { 
+    let varConfig = this.varConfigurations[varIndex];
+    return (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax);
+  }
+
+  getRandomArrayElement(array: any)
+  {
+    return array[this.getRamdomInt(array.length)];
+  }
+
+  mountWrightHistogram(originalArray: individual[], selectedInd: individual[])
+  {
+    // for (let i = 0; i < originalArray.length; i++) {
+    //   if(selectedInd.includes(originalArray[i]))
+    //   {
+    //     this.wrightHistogram[i]++;
+    //   }      
+    // }
+    for (const indiv of selectedInd) {
+      let index = originalArray.indexOf(indiv);
+      //console.log("mountWrightHistogram index", index);
+      this.wrightChildrenHistogram[index]++;
+      //this.wrightChildrenHistogram.splice(index, 1, this.wrightChildrenHistogram[index] + 1);
+    }
+  }
+
+  getTheBestIndividuos(individuals: individual[], numberOfIndividuals): individual[]
+  {
+    let ordered =  this.getAscendingFitnessPopulation(individuals);
+    return ordered.splice(individuals.length - numberOfIndividuals, individuals.length);
   }
 
   getAscendingArray(array: number[]): number[]
@@ -804,14 +883,13 @@ export class ConfigPainelComponent implements OnInit {
         this.getIndividual(this.getRandomChromosome())
       );
     }
-
     return currentGeneration;
   }
 
-  getIndividual(bigChromosome: number[]): individual {
+  getIndividual(chromosome: number[]): individual {
     //console.log("getIndividual");
     let ind: individual = {  };
-    ind.chromosome = bigChromosome.concat();
+    ind.chromosome = chromosome.concat();
     
     ind.fitness = this.calcFitness(ind.chromosome);
 
@@ -913,10 +991,19 @@ export class ConfigPainelComponent implements OnInit {
     
     ///considering 0 to 1
     /// and that minFunctionInTheInterval is a negative number
-    return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
+    //return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
+  
+    return this.functionToAnalise(chromosome) + this.fitnessConstant;
   }
 
-  functionToAnalise(chromosome: number[]): number 
+  // functionToAnalise(chromosome: number[]): number 
+  // {
+  //   const x1: number = chromosome[0];
+  //   const x2: number = chromosome[1];
+  //   return this.functionToAnaliseNuns(x1, x2);
+  // }
+
+  functionToAnalise(chromosome: number[]): number
   {
     const x1: number = chromosome[0];
     const x2: number = chromosome[1];

@@ -22,11 +22,21 @@
 				[step]="0.01" [min]="0" [max]="1"
 				[animate]="true" ></p-slider>
 				<br>
+				<h6>Número de gerações: {{maxNumOfGenerations}}</h6>
+				<p-slider class="slider" [(ngModel)]="maxNumOfGenerations" 
+				[step]="1" [min]="0" [max]="200" 
+				[animate]="true" ></p-slider>
+				<br>
 				<h6>Tamanho da população: {{populationSize}}</h6>
 				<p-slider class="slider" [(ngModel)]="populationSize" 
 				[step]="2" [min]="2" [max]="100"
 				[animate]="true" ></p-slider>
-				
+				<br><br>
+				<h6>Número de indivíduos na lista dos melhores: {{numOfBestToKeep}}</h6>
+				<p-slider class="slider" [(ngModel)]="numOfBestToKeep" 
+				[step]="1" [min]="0" [max]="200" 
+				[animate]="true" ></p-slider>
+								
 				<br>
 				<br>
 				<br>
@@ -46,21 +56,14 @@
 					<br>
 
 				</div>
+				
 				<br><br><br>
 			</div>
+
 			<div class="container col-sm-1" ></div>
+
 			<div class="container col-sm" >
-				<h6>Número de gerações: {{maxNumOfGenerations}}</h6>
-				<p-slider class="slider" [(ngModel)]="maxNumOfGenerations" 
-				[step]="1" [min]="0" [max]="200" 
-				[animate]="true" ></p-slider>
-				<br>
-				<h6>Número de indivíduos na lista dos melhores: {{numOfBestToKeep}}</h6>
-				<p-slider class="slider" [(ngModel)]="numOfBestToKeep" 
-				[step]="1" [min]="0" [max]="200" 
-				[animate]="true" ></p-slider>
 				
-				<br><br>
 				<h5>Modo de seleção de casais</h5>
 				
 				<p-radioButton label="Roleta" name="groupname" value="Roleta" [(ngModel)]="couplesSelectionMode">Roleta</p-radioButton>
@@ -94,12 +97,12 @@
 				
 				<h5>Método de crossover</h5>
 				
-				<p-radioButton label="Radcliff" name="crossoverMode" value="Radcliff" [(ngModel)]="couplesSelectionMode">Radcliff</p-radioButton>
+				<p-radioButton label="Radcliff" name="crossoverMode" value="Radcliff" [(ngModel)]="crossoverMode">Radcliff</p-radioButton>
 				<br><br>
-				<p-radioButton label="Wright" name="crossoverMode" value="Wright" [(ngModel)]="couplesSelectionMode">Wright</p-radioButton>
+				<p-radioButton label="Wright" name="crossoverMode" value="Wright" [(ngModel)]="crossoverMode">Wright</p-radioButton>
 				<br>
 				<br>
-
+				
 				<br><br><br>            
 			</div>    
 			<div class="container col-sm-1" ></div>  
@@ -128,16 +131,14 @@
 			<p-table [value]="bestInd" class="table table-dark">
 					<ng-template pTemplate="header">
 						<tr>
-							<th>x1</th>
-							<th>x2</th>
-							<th>f(x1, x2)</th>
+							<th *ngFor="let variable of varConfigurations">{{variable.name}}</th>
+							<th>f(x1,x2)</th>
 							<th>Generation</th>
 						</tr>
 					</ng-template>
 					<ng-template pTemplate="body" let-indiv>
 						<tr>
-							<td>{{indiv.chromosome[0]}}</td>
-							<td>{{indiv.chromosome[1]}}</td>
+							<td *ngFor="let varValue of indiv.chromosome">{{varValue}}</td>
 							<td>{{functionToAnalise(indiv.chromosome)}}</td>
 							<td>{{indiv.generation}}</td>
 						</tr>
