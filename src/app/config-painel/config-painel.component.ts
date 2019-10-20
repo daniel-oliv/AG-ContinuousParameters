@@ -99,7 +99,13 @@ export class ConfigPainelComponent implements OnInit {
 
   calcFitnessConstant(): number
   {
-    return 11.1;
+    let c3 = 20 * this.numOfVariables;
+
+    for (const varConfig of this.varConfigurations) {
+      c3 += varConfig.intervalMax * varConfig.intervalMax;
+    }
+    console.log("c3", c3);
+    return c3;
   }
 
   initConfigVars()
@@ -109,8 +115,8 @@ export class ConfigPainelComponent implements OnInit {
     {
       let xConfig: VarConfiguration = {
         name: 'x'+(i+1),
-        intervalMin: 0,
-        intervalMax: 10
+        intervalMin: -5.12,
+        intervalMax: 5.12
       }
       this.varConfigurations.push(xConfig);
     }
@@ -387,7 +393,7 @@ export class ConfigPainelComponent implements OnInit {
 
     //this.initGensDataset();
     this.initConfigVars();
-
+    this.fitnessConstant = this.calcFitnessConstant();
     this.drawFunction();
 
     this.wrightChildrenHistogram = [0, 0, 0];
@@ -704,6 +710,9 @@ export class ConfigPainelComponent implements OnInit {
   isInsideInterval(varIndex, varValue)
   { 
     let varConfig = this.varConfigurations[varIndex];
+    console.log("varConfig", varConfig);
+    console.log("varConfig", varValue);
+    console.log("is ", (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax));
     return (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax);
   }
 
@@ -829,7 +838,7 @@ export class ConfigPainelComponent implements OnInit {
   getRandomVarValue(varIndex: number)
   {
     let varConfig = this.varConfigurations[varIndex];
-    return this.getRamdomReal(varConfig.intervalMax - varConfig.intervalMin) - varConfig.intervalMin;
+    return this.getRamdomReal(varConfig.intervalMax - varConfig.intervalMin) + varConfig.intervalMin;
   }
 
   getRamdomReal(maxExclusive: number)
@@ -980,18 +989,10 @@ export class ConfigPainelComponent implements OnInit {
 
   calcFitness(chromosome: number[]) 
   {
-    ///trab 02 funcion
-    /// fitness was set as -f+c, since -f grows when f is minimized
-    //return - this.functionToAnalise(realNumber) + 400;
-    //return - this.functionToAnalise(realNumber);
-
-    ///trab 03 funcion
-    //return this.functionToAnalise(realNumber) - this.minFunctionInTheInterval;
-    
     ///considering 0 to 1
     /// and that minFunctionInTheInterval is a negative number
     //return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
-  
+   
     return - this.functionToAnalise(chromosome) + this.fitnessConstant;
   }
 
@@ -1004,8 +1005,11 @@ export class ConfigPainelComponent implements OnInit {
 
   functionToAnalise(chromosome: number[]): number
   {
+    //console.log("functionToAnalise ")
     let fxn = 10 * chromosome.length;
+    //console.log(" chromosome.length ", chromosome.length);
     for (const varValue of chromosome) {
+      //console.log("functionToAnalise varValue", varValue)
       fxn += varValue * varValue - 10 * Math.cos(2 * Math.PI * varValue);
     }
     return fxn;
@@ -1031,10 +1035,10 @@ export class ConfigPainelComponent implements OnInit {
 
 
     ///trab 08 function 01
-    return x1 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
+    //return x1 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
 
     ///trab 08 function 02
-    //return 20 + x1 * x1 + x2 * x2 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
+    return 20 + x1 * x1 + x2 * x2 - 10 * Math.cos(2 * Math.PI * x1) - 10 * Math.cos(2 * Math.PI * x2);
   }
 
   binArrayToDecimal(bits: number[])   
