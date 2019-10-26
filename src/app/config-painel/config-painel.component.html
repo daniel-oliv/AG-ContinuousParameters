@@ -12,6 +12,10 @@
 		<div class=" row">
 			<div class="container col-sm" >
 				<br>
+				<h6>Constante de penalização: {{constPenalty}}</h6>
+				<p-slider class="slider" [(ngModel)]="constPenalty" 
+				[step]="0.01" [min]="0" [max]="1" 
+				[animate]="true" ></p-slider><br>
 				<h6>Probabilidade de Cruzamento: {{probCruzamento|number:'1.2-5'}}</h6>
 				<p-slider class="slider" [(ngModel)]="probCruzamento" 
 				[step]="0.01" [min]="0" [max]="1" 
