@@ -66,7 +66,7 @@ export class ConfigPainelComponent implements OnInit {
 
     this.probCruzamento = 0.6;
     this.probMutacao = 0.01;
-    this.constPenalty = 0.5;
+    this.constPenalty = 30;
     this.numOfVariables = 2;
     this.graphResolution = 10;
     this.populationSize = 100;
