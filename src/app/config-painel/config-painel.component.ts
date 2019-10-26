@@ -427,7 +427,7 @@ export class ConfigPainelComponent implements OnInit {
     let initialPopulation = this.selectInitialPopulation();
 
     ///getting a list starting with the worst individual
-    let currentGeneration = this.getAscendingFitnessPopulation(initialPopulation);
+    let currentGeneration = this.getDescendingFitnessPopulation(initialPopulation);
 
     this.generations.push(currentGeneration);
 
@@ -437,7 +437,7 @@ export class ConfigPainelComponent implements OnInit {
       this.numCurrentGeneration++;
 
       ///this is not need since we are ordering in the end of the "for"
-      //currentGeneration = this.getAscendingFitnessPopulation(currentGeneration);
+      //currentGeneration = this.getDescendingFitnessPopulation(currentGeneration);
 
       //console.log(currentGeneration);
       let nextGeneration: individual[] = [];
@@ -460,7 +460,7 @@ export class ConfigPainelComponent implements OnInit {
       nextGeneration = nextGeneration.concat(individualsToKeep);
 
       ///for keeping ordered lists
-      nextGeneration = this.getAscendingFitnessPopulation(nextGeneration);
+      nextGeneration = this.getDescendingFitnessPopulation(nextGeneration);
 
       this.generations.push(nextGeneration);
       currentGeneration = nextGeneration;
@@ -507,6 +507,40 @@ export class ConfigPainelComponent implements OnInit {
       }
     }
     /*console.log("getAscendingFitnessPopulation");
+    console.log("first");
+    console.log(ordered[0]);
+    console.log("last");
+    console.log(ordered[ordered.length - 1]);*/
+    return ordered;
+  }
+
+  getDescendingFitnessPopulation(population: individual[]): individual[] {
+    //console.log("original")
+    //console.log(population)
+    let ordered: individual[] = [];
+    ordered.push(population[0]);
+    ///starting at 1, since we had already added 0th
+    for (let i = 1; i < population.length; i++) 
+    {
+      let insertedIndividual = false;
+      for (let j = 0; j < ordered.length; j++) 
+      {
+        //console.log("j" + ordered[j].fitness);
+        ///if the fitness is more than some already inserted individual's fitness, insert it before
+        if (population[i].fitness > ordered[j].fitness) 
+        {
+          ordered.splice(j, 0, population[i]);
+          insertedIndividual = true;
+          break;
+        }
+      }
+      /// if it was not inserted, push it at the end, since it is the minor value
+      if (insertedIndividual === false) 
+      {
+        ordered.push(population[i]);
+      }
+    }
+    /*console.log("getDescendingFitnessPopulation");
     console.log("first");
     console.log(ordered[0]);
     console.log("last");
@@ -586,7 +620,7 @@ export class ConfigPainelComponent implements OnInit {
       }
 
       ///ordering
-      tourneyIndividuals = this.getAscendingFitnessPopulation(tourneyIndividuals);
+      tourneyIndividuals = this.getDescendingFitnessPopulation(tourneyIndividuals);
 
       ///select the best in the group
       couples.push(this.bestIndividualFromAscendingPop(tourneyIndividuals));
@@ -614,7 +648,7 @@ export class ConfigPainelComponent implements OnInit {
         return this.selectByRoulette(generation);
         break;
       case "Torneio":
-        console.log("selectCouples torneio");
+        //console.log("selectCouples torneio");
         return this.selectByTourney(generation);
         break;
       default:
@@ -754,7 +788,7 @@ export class ConfigPainelComponent implements OnInit {
 
   getTheBestIndividuos(individuals: individual[], numberOfIndividuals): individual[]
   {
-    let ordered =  this.getAscendingFitnessPopulation(individuals);
+    let ordered =  this.getDescendingFitnessPopulation(individuals);
     return ordered.splice(individuals.length - numberOfIndividuals, individuals.length);
   }
 
@@ -949,7 +983,7 @@ export class ConfigPainelComponent implements OnInit {
         insertedInd = true;
         return;
       } 
-      else if (indiv.fitness > this.bestInd[i].fitness) 
+      else if (indiv.fitness < this.bestInd[i].fitness) 
       {
         insertedInd = true;
         //indiv.generation = this.numCurrentGeneration;
@@ -1016,7 +1050,7 @@ export class ConfigPainelComponent implements OnInit {
     /// and that minFunctionInTheInterval is a negative number
     //return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
   
-    return (    1 / (this.functionToAnalise(chromosome) + this.calcPenalty(chromosome))   );
+    return (  (this.functionToAnalise(chromosome) + this.calcPenalty(chromosome))   );
   }
 
   calcPenalty(chromosome: number[]): number
