@@ -69,11 +69,11 @@ export class ConfigPainelComponent implements OnInit {
     this.constPenalty = 0.5;
     this.numOfVariables = 2;
     this.graphResolution = 10;
-    this.populationSize = 50;
+    this.populationSize = 100;
     
     this.initConfigVars();
 
-    this.maxNumOfGenerations = 70;
+    this.maxNumOfGenerations = 120;
     this.bestInd = [];
     this.numOfBestToKeep = 5;
     this.numCurrentGeneration = 0;
@@ -83,9 +83,9 @@ export class ConfigPainelComponent implements OnInit {
     this.showGraph2 = 'none';
     //this.initGensDataset();
     this.drawFunction();
-    this.couplesSelectionMode = "Roleta";
+    this.couplesSelectionMode = "Torneio";
     this.mutationMode = "Gene";
-    this.crossoverMode = "Radcliff";
+    this.crossoverMode = "Wright";
     this.checkBoxSelectedItens = ["elitism"];
     this.numOfIndividualsInTourney = 4;
     this.numOfElitismInd = 2;
