@@ -93,6 +93,9 @@ export class ConfigPainelComponent implements OnInit {
       (valueP1: number, valueP2: number) => {return 1.5 * valueP1 - 0.5 * valueP2},
       (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 1.5 * valueP2}
     ]
+    // console.log("teste infinity");
+    // console.log(1/0 > 10000000000000);
+    // console.log(1/0 < 10000000000000);
 
     this.fitnessConstant = this.calcFitnessConstant();
   }
@@ -109,8 +112,8 @@ export class ConfigPainelComponent implements OnInit {
     {
       let xConfig: VarConfiguration = {
         name: 'x'+(i+1),
-        intervalMin: 0,
-        intervalMax: 10
+        intervalMin: -3,
+        intervalMax: 5
       }
       this.varConfigurations.push(xConfig);
     }
@@ -386,6 +389,7 @@ export class ConfigPainelComponent implements OnInit {
     ///restarting the variables
 
     //this.initGensDataset();
+    
     this.initConfigVars();
     this.fitnessConstant = this.calcFitnessConstant();
 
@@ -996,13 +1000,6 @@ export class ConfigPainelComponent implements OnInit {
     return this.functionToAnalise(chromosome) + this.fitnessConstant;
   }
 
-  // functionToAnalise(chromosome: number[]): number 
-  // {
-  //   const x1: number = chromosome[0];
-  //   const x2: number = chromosome[1];
-  //   return this.functionToAnaliseNuns(x1, x2);
-  // }
-
   functionToAnalise(chromosome: number[]): number
   {
     const x1: number = chromosome[0];
@@ -1012,13 +1009,6 @@ export class ConfigPainelComponent implements OnInit {
 
   functionToAnaliseNuns(x1: number, x2: number): number 
   {
-    
-    ///trab 02 function
-    //return - Math.abs(x * Math.sin(Math.sqrt(Math.abs(x)) ));
-
-    ///trab 03 function
-    ///to graph calculator - x * sin(x^4) + cos(x^2)
-    //return x * Math.sin(Math.pow(x, 4)) + Math.cos(Math.pow(x, 2));
 
     ///trab 04 function
     ///21.5+x* sin(4 * Math.PI * x1) + x2 * Math.sin(20 * Math.PI * x2)
@@ -1029,11 +1019,8 @@ export class ConfigPainelComponent implements OnInit {
     /////return 21.5 + x1 * Math.sin(4 * Math.PI * x1) + x2 * Math.sin(20 * Math.PI * x2);
 
 
-    ///trab 08 function 01
-    return x1 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
-
-    ///trab 08 function 02
-    //return 20 + x1 * x1 + x2 * x2 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
+    ///trab 09
+    return (x1-1)*(x1-1)+(x2-1)*(x2-1);
   }
 
   binArrayToDecimal(bits: number[])   
