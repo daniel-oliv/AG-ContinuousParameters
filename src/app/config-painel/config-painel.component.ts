@@ -56,6 +56,7 @@ export class ConfigPainelComponent implements OnInit {
   wrightExpressions: any[];
 
   fitnessConstant: number;
+  constPenalty: number;
 
   constructor() {}
 
@@ -65,6 +66,7 @@ export class ConfigPainelComponent implements OnInit {
 
     this.probCruzamento = 0.6;
     this.probMutacao = 0.01;
+    this.constPenalty = 0.5;
     this.numOfVariables = 2;
     this.graphResolution = 10;
     this.populationSize = 50;
@@ -93,17 +95,14 @@ export class ConfigPainelComponent implements OnInit {
       (valueP1: number, valueP2: number) => {return 1.5 * valueP1 - 0.5 * valueP2},
       (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 1.5 * valueP2}
     ]
-    // console.log("teste infinity");
-    // console.log(1/0 > 10000000000000);
-    // console.log(1/0 < 10000000000000);
 
-    this.fitnessConstant = this.calcFitnessConstant();
+    //this.fitnessConstant = this.calcFitnessConstant();
   }
 
-  calcFitnessConstant(): number
-  {
-    return 11.1;
-  }
+  // calcFitnessConstant(): number
+  // {
+  //   return 11.1;
+  // }
 
   initConfigVars()
   {
@@ -152,14 +151,15 @@ export class ConfigPainelComponent implements OnInit {
     this.zRealValuesGraph = [];
     this.x1GraphValues = [];
     this.x2GraphValues = [];
+
     for (let varConfig of this.varConfigurations) {
       this.getIntervalLabels(varConfig)
     }
 
-    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=5) 
+    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=15) 
     {
       let x1 = this.varConfigurations[0].xRealValues[ix1];
-      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=5)
+      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=15)
       {
         let x2 = this.varConfigurations[1].xRealValues[ix2];
         this.x1GraphValues.push(x1);
@@ -181,6 +181,7 @@ export class ConfigPainelComponent implements OnInit {
 
     //this.minFunctionInTheInterval = this.minMatrix(this.zRealValues);
     //this.maxFunctionInTheInterval = this.maxMatrix(this.zRealValues);
+    //this.minFunctionInTheInterval = this.getMinConditioned(this.zRealValuesVec, this.varConfigurations[0].xRealValues, this.varConfigurations[1].xRealValues);
     this.minFunctionInTheInterval = this.minArray(this.zRealValuesVec);
     this.maxFunctionInTheInterval = this.maxArray(this.zRealValuesVec);
     //console.log("zRealValues: ", this.zRealValues);
@@ -199,6 +200,24 @@ export class ConfigPainelComponent implements OnInit {
       } 
     }
     return minValue;
+  }
+
+  getMinConditioned(arr: number[], x1Array:number[], x2Array:number[])
+  {
+    let minValue = arr[0];
+    for (let index = 1; index < arr.length; index++) 
+    {
+      ///se o minValue é mario que o elemento do array, então ele não o menor e deve ser trocado
+      if (minValue > arr[index] && this.respectConditions(x1Array[index], x2Array[index])) minValue = arr[index];
+    }
+    
+    return minValue;
+  }
+
+  respectConditions(x1: number, x2: number):boolean
+  {
+    let tolerancia = 2;
+    return ( (x1 + x2 - 0.5 <= 0) && (x1 - x2 - 2 >= 0 -tolerancia && x1 - x2 - 2 <= 0 +tolerancia))
   }
 
   minArray(arr: number[]) 
@@ -391,7 +410,7 @@ export class ConfigPainelComponent implements OnInit {
     //this.initGensDataset();
     
     this.initConfigVars();
-    this.fitnessConstant = this.calcFitnessConstant();
+    //this.fitnessConstant = this.calcFitnessConstant();
 
     this.drawFunction();
 
@@ -997,7 +1016,26 @@ export class ConfigPainelComponent implements OnInit {
     /// and that minFunctionInTheInterval is a negative number
     //return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
   
-    return this.functionToAnalise(chromosome) + this.fitnessConstant;
+    return (    1 / (this.functionToAnalise(chromosome) + this.calcPenalty(chromosome))   );
+  }
+
+  calcPenalty(chromosome: number[]): number
+  {
+    const x1: number = chromosome[0];
+    const x2: number = chromosome[1];
+    return this.constPenalty * (this.penalty1(x1, x2) + this.penalty2(x1, x2));
+  }
+
+  penalty1(x1: number, x2: number): number 
+  {
+    let maxV = Math.max(0, x1 + x2 - 0.5)
+    return maxV*maxV;
+  }
+
+  penalty2(x1: number, x2: number): number 
+  {
+    let temp = x1 - x2 - 2;
+    return temp*temp; 
   }
 
   functionToAnalise(chromosome: number[]): number
