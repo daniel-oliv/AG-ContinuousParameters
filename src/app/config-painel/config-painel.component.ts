@@ -548,6 +548,7 @@ export class ConfigPainelComponent implements OnInit {
     return ordered;
   }
 
+  /// deve inverter para fitnessMaior - fitness no caso de minimização'
   calcSumFits(population: individual[]): number 
   {
     let sumFits = 0;
