@@ -64,14 +64,14 @@ export class ConfigPainelComponent implements OnInit {
     console.log("ngOnInit");
 
     this.probCruzamento = 0.6;
-    this.probMutacao = 0.01;
-    this.numOfVariables = 2;
+    this.probMutacao = 0.12;
+    this.numOfVariables = 5;
     this.graphResolution = 10;
-    this.populationSize = 50;
+    this.populationSize = 80;
     
     this.initConfigVars();
 
-    this.maxNumOfGenerations = 70;
+    this.maxNumOfGenerations = 120;
     this.bestInd = [];
     this.numOfBestToKeep = 5;
     this.numCurrentGeneration = 0;
@@ -81,9 +81,9 @@ export class ConfigPainelComponent implements OnInit {
     this.showGraph2 = 'none';
     //this.initGensDataset();
     this.drawFunction();
-    this.couplesSelectionMode = "Roleta";
+    this.couplesSelectionMode = "Torneio";
     this.mutationMode = "Gene";
-    this.crossoverMode = "Radcliff";
+    this.crossoverMode = "Wright";
     this.checkBoxSelectedItens = ["elitism"];
     this.numOfIndividualsInTourney = 4;
     this.numOfElitismInd = 2;
@@ -710,9 +710,9 @@ export class ConfigPainelComponent implements OnInit {
   isInsideInterval(varIndex, varValue)
   { 
     let varConfig = this.varConfigurations[varIndex];
-    console.log("varConfig", varConfig);
-    console.log("varConfig", varValue);
-    console.log("is ", (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax));
+    //console.log("varConfig", varConfig);
+    //console.log("varConfig", varValue);
+    //console.log("is ", (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax));
     return (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax);
   }
 
