@@ -14,7 +14,7 @@
 				<br>
 				<h6>Constante de penalização: {{constPenalty}}</h6>
 				<p-slider class="slider" [(ngModel)]="constPenalty" 
-				[step]="0.01" [min]="0" [max]="50" 
+				[step]="1" [min]="0" [max]="10000000" 
 				[animate]="true" ></p-slider><br>
 				<h6>Probabilidade de Cruzamento: {{probCruzamento|number:'1.2-5'}}</h6>
 				<p-slider class="slider" [(ngModel)]="probCruzamento" 
