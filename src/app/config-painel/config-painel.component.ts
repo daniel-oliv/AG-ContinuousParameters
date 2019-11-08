@@ -9,6 +9,10 @@ declare var Plotly: any;
   styleUrls: ["./config-painel.component.css"]
 })
 export class ConfigPainelComponent implements OnInit {
+  b: number;
+  a: number;
+  numDifferenceVectors: number;
+
   probMutacao: number;
   probCruzamento: number;
   graphResolution: number;
@@ -62,10 +66,12 @@ export class ConfigPainelComponent implements OnInit {
   ngOnInit() 
   {
     console.log("ngOnInit");
-
+    this.b = 100;
+    this.a = 1;
+    this.numDifferenceVectors = 1;
     this.probCruzamento = 0.6;
     this.probMutacao = 0.12;
-    this.numOfVariables = 5;
+    this.numOfVariables = 2;
     this.graphResolution = 10;
     this.populationSize = 80;
     
@@ -99,10 +105,12 @@ export class ConfigPainelComponent implements OnInit {
 
   calcFitnessConstant(): number
   {
-    let c3 = 20 * this.numOfVariables;
+    let c3 = 0;
 
-    for (const varConfig of this.varConfigurations) {
-      c3 += varConfig.intervalMax * varConfig.intervalMax;
+    for (let i = 0; i < this.varConfigurations.length - 1; i++) {
+      let max = this.varConfigurations[i+1].intervalMax;
+      let min = this.varConfigurations[i].intervalMin;
+      c3 += this.b * (max * max) + (this.a - min) * (this.a - min);
     }
     console.log("c3", c3);
     return c3;
@@ -115,8 +123,10 @@ export class ConfigPainelComponent implements OnInit {
     {
       let xConfig: VarConfiguration = {
         name: 'x'+(i+1),
-        intervalMin: -5.12,
-        intervalMax: 5.12
+        intervalMin:-2,
+        intervalMax: 2
+        // intervalMin: -5.12,
+        // intervalMax: 5.12
       }
       this.varConfigurations.push(xConfig);
     }
@@ -159,10 +169,10 @@ export class ConfigPainelComponent implements OnInit {
       this.getIntervalLabels(varConfig)
     }
 
-    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=5) 
+    for (let ix1=0; ix1<this.varConfigurations[0].xRealValues.length; ix1+=50) 
     {
       let x1 = this.varConfigurations[0].xRealValues[ix1];
-      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=5)
+      for (let ix2=0; ix2<this.varConfigurations[1].xRealValues.length; ix2+=50)
       {
         let x2 = this.varConfigurations[1].xRealValues[ix2];
         this.x1GraphValues.push(x1);
@@ -1006,11 +1016,12 @@ export class ConfigPainelComponent implements OnInit {
   functionToAnalise(chromosome: number[]): number
   {
     //console.log("functionToAnalise ")
-    let fxn = 10 * chromosome.length;
+    let fxn = 0;
     //console.log(" chromosome.length ", chromosome.length);
-    for (const varValue of chromosome) {
-      //console.log("functionToAnalise varValue", varValue)
-      fxn += varValue * varValue - 10 * Math.cos(2 * Math.PI * varValue);
+    for (let i = 0; i < chromosome.length - 1; i++) {
+      let x1 = chromosome[i];
+      let x2 = chromosome[i+1];
+      fxn += this.b * (x2-x1*x1) * (x2-x1*x1) + (this.a-x1) * (this.a-x1);
     }
     return fxn;
   }
@@ -1038,7 +1049,10 @@ export class ConfigPainelComponent implements OnInit {
     //return x1 * Math.sin(4 * x1) + 1.1 * Math.sin(2 * x2);
 
     ///trab 08 function 02
-    return 20 + x1 * x1 + x2 * x2 - 10 * Math.cos(2 * Math.PI * x1) - 10 * Math.cos(2 * Math.PI * x2);
+    //return 20 + x1 * x1 + x2 * x2 - 10 * Math.cos(2 * Math.PI * x1) - 10 * Math.cos(2 * Math.PI * x2);
+
+    ///trab 10
+    return this.b * (x2-x1*x1) * (x2-x1*x1) + (this.a-x1) * (this.a-x1);
   }
 
   binArrayToDecimal(bits: number[])   
