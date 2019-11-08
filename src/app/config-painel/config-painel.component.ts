@@ -61,7 +61,7 @@ export class ConfigPainelComponent implements OnInit {
   wrightChildrenHistogram: number[];
   wrightExpressions: any[];
 
-  fitnessConstant: number;
+  //fitnessConstant: number;
 
   constructor() {}
 
@@ -103,10 +103,10 @@ export class ConfigPainelComponent implements OnInit {
       (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 1.5 * valueP2}
     ]
 
-    this.fitnessConstant = this.calcFitnessConstant();
+    //this.fitnessConstant = this.calcFitnessConstant();
   }
 
-  calcFitnessConstant(): number
+  /*calcFitnessConstant(): number
   {
     let c3 = 0;
 
@@ -117,7 +117,7 @@ export class ConfigPainelComponent implements OnInit {
     }
     console.log("c3", c3);
     return c3;
-  }
+  }*/
 
   initConfigVars()
   {
@@ -407,7 +407,7 @@ export class ConfigPainelComponent implements OnInit {
 
     //this.initGensDataset();
     //this.initConfigVars();
-    this.fitnessConstant = this.calcFitnessConstant();
+    //this.fitnessConstant = this.calcFitnessConstant();
     this.drawFunction();
 
     this.wrightChildrenHistogram = [0, 0, 0];
