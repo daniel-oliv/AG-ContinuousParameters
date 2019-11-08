@@ -73,7 +73,7 @@ export class ConfigPainelComponent implements OnInit {
     this.a = 1;
     this.numDifferenceVectors = 1;
     this.probCruzamento = 0.6;
-    this.probMutacao = 0.12;
+    this.probMutacao = 0.30;
     this.numOfVariables = 2;
     this.graphResolution = 10;
     this.populationSize = 80;
@@ -126,10 +126,10 @@ export class ConfigPainelComponent implements OnInit {
     {
       let xConfig: VarConfiguration = {
         name: 'x'+(i+1),
-        intervalMin:-2,
-        intervalMax: 2
-        // intervalMin: -5.12,
-        // intervalMax: 5.12
+        // intervalMin:-2,
+        // intervalMax: 2
+        intervalMin: -5.12,
+        intervalMax: 5.12
       }
       this.varConfigurations.push(xConfig);
     }
