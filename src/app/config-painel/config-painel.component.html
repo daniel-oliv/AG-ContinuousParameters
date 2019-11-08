@@ -82,6 +82,13 @@
 				<br>
 				<br>
 
+				<h5>Parâmetro F: {{F}}</h5>
+				<p-slider class="slider" [(ngModel)]="F" 
+				[step]="0.1" [min]="0" [max]="2" 
+				[animate]="true" ></p-slider>
+				<br>
+				<br>
+
 				<h5>Número de diferenças na perturbação de vetores: {{numDifferenceVectors}}</h5>
 				<p-slider class="slider" [(ngModel)]="numDifferenceVectors" 
 				[step]="1" [min]="1" [max]="5" 

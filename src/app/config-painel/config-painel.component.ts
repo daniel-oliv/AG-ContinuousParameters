@@ -67,11 +67,11 @@ export class ConfigPainelComponent implements OnInit {
 
   ngOnInit() 
   {
-    console.log("ngOnInit");
+    //console.log("ngOnInit");
     this.spentTime = 0;
     this.b = 100;
     this.a = 1;
-    this.F = 0.8;
+    this.F = 1.2;
     this.numDifferenceVectors = 1;
     this.probCruzamento = 0.6;
     this.probMutacao = 0.30;
@@ -467,7 +467,7 @@ export class ConfigPainelComponent implements OnInit {
     ///////}
     this.plotPerformanceGraph(this.generations);
     //this.generationsDataSets.push(this.getDataSetGeneration(this.generations[0]));
-    console.log(this.wrightChildrenHistogram);
+    //console.log(this.wrightChildrenHistogram);
     //console.log(this.generations);
   }
 
@@ -588,7 +588,7 @@ export class ConfigPainelComponent implements OnInit {
   isInsideInterval(varIndex, varValue)
   { 
     let varConfig = this.varConfigurations[varIndex];
-    console.log("isInsideInterval");
+    //console.log("isInsideInterval");
     //console.log("varConfig", varValue);
     //console.log("is ", (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax));
     return (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax);
@@ -655,7 +655,7 @@ export class ConfigPainelComponent implements OnInit {
 
   applyDEMutation(population: individual[]) 
   {
-    console.log("applyDEMutation");
+    //console.log("applyDEMutation");
     let newChromosome;
     let u, v;
     //console.log("applyMutation");
@@ -665,17 +665,24 @@ export class ConfigPainelComponent implements OnInit {
       newChromosome = [];
       // the number of random vectors include one to sum and 2 * numOfDif to calculate differences
       let randChromosomes = this.getRandomVectors(population, 1 + 2 * this.numDifferenceVectors, [j]);
-      console.log("randChromosomes ", randChromosomes);
+      //console.log("randChromosomes ", randChromosomes);
       for (let i = 0; i < this.numOfVariables; i++) {
         // for every variable
         // perturbando um vetor com diferenças
-        console.log("applyDEMutation i " + i);
-        do{
-          v = randChromosomes[0][i];
-          for (let dif = 0; dif < this.numDifferenceVectors; dif++) {
-            v += this.F * (randChromosomes[1+dif] + randChromosomes[1+ dif + this.numDifferenceVectors] )         
-          }
-        }while(!this.isInsideInterval(i, v))
+        //console.log("applyDEMutation i " + i);
+        
+        v = randChromosomes[0][i];
+        for (let dif = 0; dif < this.numDifferenceVectors; dif++) {
+          v += this.F * (randChromosomes[1+dif] + randChromosomes[1+ dif + this.numDifferenceVectors] )         
+        }
+
+        if(!this.isInsideInterval(i, v))
+        {
+          //console.log("!isInsideInterval");
+          v = this.getRandomVarValue(i);
+          //v = indiv.chromosome[i];
+        }
+
         // cruzamento
         let indexToCross = this.getRamdomInt(this.numOfVariables);
         if(Math.random() <= this.probCruzamento || i === indexToCross){
@@ -697,7 +704,7 @@ export class ConfigPainelComponent implements OnInit {
 
   getRandomVectors(population: individual[], numOfVectors: number, indexesToExclude: number[] = []): number[]
   {
-    console.log("indexesToExclude", indexesToExclude);
+    //console.log("indexesToExclude", indexesToExclude);
     let randVectors = [];
     while(randVectors.length < numOfVectors)
     {
@@ -813,8 +820,8 @@ export class ConfigPainelComponent implements OnInit {
 
   splitArray(array:any [], numOfNewArrays: number): any []
   {
-    // console.log("splitArray big array", array);
-    // console.log("splitArray numOfNewArrays", numOfNewArrays);
+    //console.log("splitArray big array", array);
+    //console.log("splitArray numOfNewArrays", numOfNewArrays);
 
     let arrays: any [] = [];
     let sizeNewArrays = array.length / numOfNewArrays;
