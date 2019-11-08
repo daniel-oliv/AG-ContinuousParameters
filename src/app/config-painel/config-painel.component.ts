@@ -71,9 +71,9 @@ export class ConfigPainelComponent implements OnInit {
     this.spentTime = 0;
     this.b = 100;
     this.a = 1;
-    this.F = 1.2;
+    this.F = 0.5;
     this.numDifferenceVectors = 1;
-    this.probCruzamento = 0.6;
+    this.probCruzamento = 0.9;
     this.probMutacao = 0.30;
     this.numOfVariables = 2;
     this.graphResolution = 10;
@@ -81,7 +81,7 @@ export class ConfigPainelComponent implements OnInit {
     
     this.initConfigVars();
 
-    this.maxNumOfGenerations = 120;
+    this.maxNumOfGenerations = 200;
     this.bestInd = [];
     this.numOfBestToKeep = 5;
     this.numCurrentGeneration = 0;
