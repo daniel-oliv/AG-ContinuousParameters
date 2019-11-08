@@ -26,11 +26,6 @@
 				[step]="0.01" [min]="0" [max]="1" 
 				[animate]="true" ></p-slider>
 				<br>
-				<h6>Probabilidade de Mutação: {{probMutacao|number:'1.2-5'}}</h6>
-				<p-slider class="slider" [(ngModel)]="probMutacao" 
-				[step]="0.01" [min]="0" [max]="1"
-				[animate]="true" ></p-slider>
-				<br>
 				<h6>Número de gerações: {{maxNumOfGenerations}}</h6>
 				<p-slider class="slider" [(ngModel)]="maxNumOfGenerations" 
 				[step]="1" [min]="0" [max]="200" 
@@ -73,42 +68,24 @@
 
 			<div class="container col-sm" >
 				
-				<h5>Modo de seleção de casais</h5>
-				
-				<p-radioButton label="Roleta" name="groupname" value="Roleta" [(ngModel)]="couplesSelectionMode">Roleta</p-radioButton>
-				<br><br>
-				<p-radioButton label="Torneio" name="groupname" value="Torneio" [(ngModel)]="couplesSelectionMode">Torneio</p-radioButton>
-				<br>
-				<br>
-				<h6>Indivíduos por torneio: {{numOfIndividualsInTourney}}</h6>
-				<p-slider class="slider" [(ngModel)]="numOfIndividualsInTourney" 
-				[step]="1" [min]="1" [max]="populationSize" 
+				<h5>Parâmetro a: {{a}}</h5>
+				<p-slider class="slider" [(ngModel)]="a" 
+				[step]="1" [min]="1" [max]="20" 
 				[animate]="true" ></p-slider>
 				<br>
 				<br>
-				<br>
-				<p-checkbox label="Habilitar elistismo" name="groupname" value="elitism" [(ngModel)]="checkBoxSelectedItens"></p-checkbox>
-				<br>
-				<br>
-				<h6>Indivíduos preservados por elitismo: {{numOfElitismInd}}</h6>
-				<p-slider class="slider" [(ngModel)]="numOfElitismInd" 
-				[step]="2" [min]="0" [max]="populationSize" 
+
+				<h5>Parâmetro b: {{b}}</h5>
+				<p-slider class="slider" [(ngModel)]="b" 
+				[step]="1" [min]="1" [max]="200" 
 				[animate]="true" ></p-slider>
 				<br>
 				<br>
-				<h5>Modo de mutação</h5>
-				
-				<p-radioButton label="Individuo" name="mutationMode" value="Individuo" [(ngModel)]="mutationMode">Uma por indivíduo</p-radioButton>
-				<br><br>
-				<p-radioButton label="Gene" name="mutationMode" value="Gene" [(ngModel)]="mutationMode">Para cada gene</p-radioButton>
-				<br>
-				<br>
-				
-				<h5>Método de crossover</h5>
-				
-				<p-radioButton label="Radcliff" name="crossoverMode" value="Radcliff" [(ngModel)]="crossoverMode">Radcliff</p-radioButton>
-				<br><br>
-				<p-radioButton label="Wright" name="crossoverMode" value="Wright" [(ngModel)]="crossoverMode">Wright</p-radioButton>
+
+				<h5>Número de diferenças na perturbação de vetores: {{numDifferenceVectors}}</h5>
+				<p-slider class="slider" [(ngModel)]="numDifferenceVectors" 
+				[step]="1" [min]="1" [max]="5" 
+				[animate]="true" ></p-slider>
 				<br>
 				<br>
 

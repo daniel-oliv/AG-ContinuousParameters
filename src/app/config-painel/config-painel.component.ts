@@ -13,6 +13,7 @@ export class ConfigPainelComponent implements OnInit {
   spentTime;
   b: number;
   a: number;
+  F: number;
   numDifferenceVectors: number;
 
   probMutacao: number;
@@ -40,7 +41,6 @@ export class ConfigPainelComponent implements OnInit {
   crossoverMode: string;
   checkBoxSelectedItens: string[];
   numOfIndividualsInTourney: number;
-  numOfElitismInd: number;
   //graphData: any;
   //functionDataSet: any;
   //generationsDataSets: any[];
@@ -71,6 +71,7 @@ export class ConfigPainelComponent implements OnInit {
     this.spentTime = 0;
     this.b = 100;
     this.a = 1;
+    this.F = 0.8;
     this.numDifferenceVectors = 1;
     this.probCruzamento = 0.6;
     this.probMutacao = 0.30;
@@ -93,9 +94,7 @@ export class ConfigPainelComponent implements OnInit {
     this.couplesSelectionMode = "Torneio";
     this.mutationMode = "Gene";
     this.crossoverMode = "Wright";
-    this.checkBoxSelectedItens = ["elitism"];
     this.numOfIndividualsInTourney = 4;
-    this.numOfElitismInd = 2;
     
     this.wrightExpressions = [
       (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 0.5 * valueP2},
@@ -135,7 +134,7 @@ export class ConfigPainelComponent implements OnInit {
     }
   }
 
-  numOfNewIndividual() 
+  /*numOfNewIndividual() 
   {
     let numOfNewIndividual: number;
 
@@ -149,7 +148,7 @@ export class ConfigPainelComponent implements OnInit {
     }
 
     return numOfNewIndividual;
-  }
+  }*/
 
   initGensDataset() 
   {
@@ -439,16 +438,10 @@ export class ConfigPainelComponent implements OnInit {
       let nextGeneration: individual[] = [];
       let individualsToKeep: individual[] = [];
 
-      /// if elitism is enable
-      if (this.checkBoxSelectedItens.indexOf("elitism") >= 0) 
-      {
-        individualsToKeep = this.bestIndividualsFromAscendingPop(currentGeneration, this.numOfElitismInd);
-      }
-
-      this.applyCrossover(currentGeneration, nextGeneration);
-
+      //this.applyCrossover(currentGeneration, nextGeneration);
+      nextGeneration = currentGeneration.concat();
       ///console here will show the final next population, since chrome update the objects in console
-      this.applyMutation(nextGeneration);
+      this.applyDEMutation(nextGeneration);
 
       //console.log(nextGeneration);
 
@@ -582,51 +575,6 @@ export class ConfigPainelComponent implements OnInit {
     return cis;
   }
 
-  selectByRoulette(generation: individual[]): individual[] {
-    let couples: individual[] = [];
-    let sumFits: number = this.calcSumFits(generation);
-    let pi = this.calcPIs(generation, sumFits);
-    let ci = this.calcCumulativeProb(pi);
-    while (couples.length < this.numOfNewIndividual()) 
-    {
-      let randomNumber = Math.random();
-      let selectedIndex = 0;
-      while (randomNumber > ci[selectedIndex]) 
-      {
-        selectedIndex++;
-      }
-      //console.log("selectByRoulette " + "randomNumber[" + randomNumber + "]" + " selectedIndex[" + selectedIndex + "]"+ " ci[" + ci[selectedIndex] + "]");
-      couples.push(generation[selectedIndex]);
-    }
-
-    return couples;
-  }
-
-  selectByTourney(generation: individual[]): individual[] 
-  {
-    let couples: individual[] = [];
-
-    while (couples.length < this.numOfNewIndividual()) 
-    {
-      ///select individual by random
-      let tourneyIndividuals = [];
-      for (let index = 0; index < this.numOfIndividualsInTourney; index++) 
-      {
-        let randomIndex = Math.floor(Math.random() * this.populationSize);
-        //if(teste < 0 && this.numCurrentGeneration < 2) console.log("selectByTourney randomIndex: " +randomIndex);
-        tourneyIndividuals.push(generation[randomIndex]);
-      }
-
-      ///ordering
-      tourneyIndividuals = this.getDescendingFitnessPopulation(tourneyIndividuals);
-
-      ///select the best in the group
-      couples.push(this.bestIndividualFromAscendingPop(tourneyIndividuals));
-    }
-
-    return couples;
-  }
-
   bestIndividualFromAscendingPop(ascendingPopulation: individual[]) 
   {
     return ascendingPopulation[ascendingPopulation.length - 1];
@@ -637,130 +585,10 @@ export class ConfigPainelComponent implements OnInit {
     return ascendingPopulation.slice(ascendingPopulation.length - numOfIndividuals, ascendingPopulation.length);
   }
 
-  selectCouples(generation: individual[]) 
-  {
-    switch (this.couplesSelectionMode) 
-    {
-      case "Roleta":
-        //console.log("selectCouples roleta");
-        return this.selectByRoulette(generation);
-        break;
-      case "Torneio":
-        //console.log("selectCouples torneio");
-        return this.selectByTourney(generation);
-        break;
-      default:
-        //console.log("selectCouples default");
-        return null;
-        break;
-    }
-  }
-
-  applyCrossover(previousGeneration: individual[], nextGeneration: individual[]) 
-  {
-    //console.log("applyCrossover");
-    let couples = this.selectCouples(previousGeneration);
-
-    /// for every group of two individuals try to cross
-    for (let index = 0; index < couples.length; index += 2) 
-    {
-      let couple: individual[] = couples.slice(index, index + 2);
-      //console.log("couple");
-
-      if (Math.random() < this.probCruzamento) 
-      {
-        ///cruza
-        //console.log("can crossover");
-        let newIndividuals: individual[] = this.crossIndividuals(couple);
-        nextGeneration.push(newIndividuals[0]);
-        nextGeneration.push(newIndividuals[1]);
-        //console.log(nextGeneration);
-      } 
-      else 
-      {
-        ///keep with parents
-        nextGeneration.push(couple[0]);
-        nextGeneration.push(couple[1]);
-      }
-    }
-  }
-
-  crossIndividuals(couple: individual[]): individual[] {
-    switch (this.crossoverMode) 
-    {
-      case 'Radcliff':
-        //console.log("crossIndividuals 1 cut");
-        return this.radcliffCrossover(couple);
-        break;
-      case 'Wright':
-        //console.log("crossIndividuals 2 cuts");
-        return this.wrightCrossover(couple);
-        break;
-      default:
-        //console.log("selectCouples default");
-        return null;
-        break;
-    }
-  }
-
-  radcliffCrossover(couple: individual[])
-  {
-    let newIndividuals: individual[] = [];
-    let beta: number;
-    let newChromosome: number[] = [];
-    let newValue: number;
-    for (let i = 0; i < this.numOfVariables; i++) {
-      beta = Math.random();
-      newChromosome.push( beta * couple[0].chromosome[i] + (1-beta) * couple[1].chromosome[i]);
-    }
-    newIndividuals.push( this.getIndividual(newChromosome) );
-    
-    newChromosome.length = 0;
-    for (let i = 0; i < this.numOfVariables; i++) {
-      beta = Math.random();
-      newChromosome.push( (1-beta) * couple[1].chromosome[i] + beta * couple[0].chromosome[i]);
-    }
-    newIndividuals.push( this.getIndividual(newChromosome) );
-
-    return newIndividuals;
-  }
-
-  ///////TODO
-  wrightCrossover(couple: individual[])
-  {
-    let newIndividuals: individual[] = [];
-    let newChromosome: number[] = [];
-    let varValue: number;
-
-    for (const wrightExp of this.wrightExpressions) {
-      for (let i = 0; i < this.numOfVariables; i++) {
-        varValue = wrightExp(couple[0].chromosome[i], couple[1].chromosome[i]);
-        //console.log("varValue", varValue);
-        if(this.isInsideInterval(i, varValue))
-        {
-          newChromosome.push(varValue);
-        }
-        else
-        {
-          newChromosome.push(this.getRandomArrayElement(couple).chromosome[i]);
-        }
-      }
-      newIndividuals.push( this.getIndividual(newChromosome) );
-      newChromosome.length = 0;
-    }
-    //console.log("wrightCrossover newIndividuals ", newIndividuals.concat());
-    let selectedInd = this.getTheBestIndividuos(newIndividuals, 2);
-
-    this.mountWrightHistogram(newIndividuals, selectedInd);
-
-    //console.log("wrightCrossover selectedInd ", selectedInd.concat());
-    return selectedInd;
-  }
-
   isInsideInterval(varIndex, varValue)
   { 
     let varConfig = this.varConfigurations[varIndex];
-    //console.log("varConfig", varConfig);
+    console.log("isInsideInterval");
     //console.log("varConfig", varValue);
     //console.log("is ", (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax));
     return (varValue  >= varConfig.intervalMin) && (varValue  <= varConfig.intervalMax);
@@ -825,36 +653,62 @@ export class ConfigPainelComponent implements OnInit {
     return ordered;
   }
 
-  applyMutation(population: individual[]) 
+  applyDEMutation(population: individual[]) 
   {
+    console.log("applyDEMutation");
     let newChromosome;
-    let mutationApplied = false;
+    let u, v;
     //console.log("applyMutation");
     for (let j = 0; j < population.length; j++) 
     {
       let indiv = population[j];
-      newChromosome = indiv.chromosome.concat();;
-      switch (this.mutationMode) 
-      {
-        case "Gene":
-          //console.log("applyMutation Gene");
-          mutationApplied = this.tryMutationInGenes(newChromosome);
-          break;
-        case "Individuo":
-          //console.log("applyMutation tryOneMutation");
-          mutationApplied = this.tryOneMutation(newChromosome);
-          break;
-        default:
-          //console.log("applyMutation default");
-          return null;
-          break;
+      newChromosome = [];
+      // the number of random vectors include one to sum and 2 * numOfDif to calculate differences
+      let randChromosomes = this.getRandomVectors(population, 1 + 2 * this.numDifferenceVectors, [j]);
+      console.log("randChromosomes ", randChromosomes);
+      for (let i = 0; i < this.numOfVariables; i++) {
+        // for every variable
+        // perturbando um vetor com diferenças
+        console.log("applyDEMutation i " + i);
+        do{
+          v = randChromosomes[0][i];
+          for (let dif = 0; dif < this.numDifferenceVectors; dif++) {
+            v += this.F * (randChromosomes[1+dif] + randChromosomes[1+ dif + this.numDifferenceVectors] )         
+          }
+        }while(!this.isInsideInterval(i, v))
+        // cruzamento
+        let indexToCross = this.getRamdomInt(this.numOfVariables);
+        if(Math.random() <= this.probCruzamento || i === indexToCross){
+          u = v;
+        }else{
+          u = indiv.chromosome[i];
+        }
+        newChromosome.push(u);
       }
+      
+      let newIndividual = this.getIndividual(newChromosome);
 
-      if (mutationApplied) 
+      if (newIndividual.fitness < indiv.fitness) 
       {
         population.splice(j, 1, this.getIndividual(newChromosome));
       } 
     }
+  }
+
+  getRandomVectors(population: individual[], numOfVectors: number, indexesToExclude: number[] = []): number[]
+  {
+    console.log("indexesToExclude", indexesToExclude);
+    let randVectors = [];
+    while(randVectors.length < numOfVectors)
+    {
+      let randomIndex;
+      do{
+        randomIndex = this.getRamdomInt(population.length);
+      }while(indexesToExclude.includes(randomIndex))
+      indexesToExclude.push(randomIndex);
+      randVectors.push(population[randomIndex].chromosome);
+    }
+    return randVectors;
   }
 
   tryMutationInGenes(newChromosome: number[]): boolean
