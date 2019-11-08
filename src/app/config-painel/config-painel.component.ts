@@ -406,7 +406,7 @@ export class ConfigPainelComponent implements OnInit {
     ///restarting the variables
 
     //this.initGensDataset();
-    this.initConfigVars();
+    //this.initConfigVars();
     this.fitnessConstant = this.calcFitnessConstant();
     this.drawFunction();
 
