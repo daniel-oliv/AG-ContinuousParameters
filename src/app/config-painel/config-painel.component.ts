@@ -9,6 +9,8 @@ declare var Plotly: any;
   styleUrls: ["./config-painel.component.css"]
 })
 export class ConfigPainelComponent implements OnInit {
+  startTime;
+  spentTime;
   b: number;
   a: number;
   numDifferenceVectors: number;
@@ -66,6 +68,7 @@ export class ConfigPainelComponent implements OnInit {
   ngOnInit() 
   {
     console.log("ngOnInit");
+    this.spentTime = 0;
     this.b = 100;
     this.a = 1;
     this.numDifferenceVectors = 1;
@@ -398,6 +401,7 @@ export class ConfigPainelComponent implements OnInit {
   optimize() 
   {
     //console.log("optimize");
+    this.startTime = performance.now();
 
     ///restarting the variables
 
@@ -457,6 +461,8 @@ export class ConfigPainelComponent implements OnInit {
       this.generations.push(nextGeneration);
       currentGeneration = nextGeneration;
     }///while
+
+    this.spentTime = performance.now() - this.startTime;
 
     ///updating graphs
     ///////this.generationsDataSets = this.getDataSetGeneration(this.generations);
