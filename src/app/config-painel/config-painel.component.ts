@@ -884,12 +884,10 @@ export class ConfigPainelComponent implements OnInit {
 interface individual {
   ///the array representing all the variables - now containing real numbers
   vector?: number[];
-  
+  ///keeps the function value f(x1,...,xn)
   fxn?: number;
-
   ///indicates how much the the individual is good (generally is f(x)+c)
   fitness?: number;
-
   ///generation number
   generation?: number;
 }
