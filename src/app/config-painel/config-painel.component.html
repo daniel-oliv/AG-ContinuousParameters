@@ -112,14 +112,12 @@
 		<h2 class="rootTag container">Function Graph</h2>
 		<div class="chartDiv">
 			<div id="3dGraph" style="width: 100%; height: 500px;"></div>
-			<!--<p-chart [style.display]="showGraph2" type="line" [data]="graphData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>-->
 		</div>
 	</p-accordionTab>
 	<p-accordionTab header="Curva de desempenho" [selected]="false">
 		<h2 class="rootTag container">Curva de desempenho</h2>
 		<div class="chartDiv">
 			<p-chart [style.display]="'block'" type="line" [data]="performanceData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>
-			<!--<p-chart [style.display]="showGraph2" type="line" [data]="graphData" [responsive]="isGraphResponsive" width="95vw" height="80vh"></p-chart>-->
 		</div>
 		<h2 class="rootTag container">Fitness do melhor indivíduo</h2>
 		<div class="chartDiv">
@@ -138,7 +136,7 @@
 					</ng-template>
 					<ng-template pTemplate="body" let-indiv>
 						<tr>
-							<td *ngFor="let varValue of indiv.chromosome">{{varValue}}</td>
+							<td *ngFor="let varValue of indiv.vector">{{varValue}}</td>
 							<td>{{indiv.fxn}}</td>
 							<td>{{indiv.generation}}</td>
 						</tr>

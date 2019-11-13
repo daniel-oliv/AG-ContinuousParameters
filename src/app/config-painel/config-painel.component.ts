@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 
 declare var Plotly: any;
 
-
 @Component({
   selector: "app-config-painel",
   templateUrl: "./config-painel.component.html",
@@ -16,7 +15,6 @@ export class ConfigPainelComponent implements OnInit {
   F: number;
   numDifferenceVectors: number;
 
-  probMutacao: number;
   probCruzamento: number;
   graphResolution: number;
   populationSize: number;
@@ -36,10 +34,6 @@ export class ConfigPainelComponent implements OnInit {
   numOfBestToKeep: number;
   numCurrentGeneration: number;
   generations: any[];
-  couplesSelectionMode: string;
-  mutationMode: string;
-  crossoverMode: string;
-  checkBoxSelectedItens: string[];
   numOfIndividualsInTourney: number;
   //graphData: any;
   //functionDataSet: any;
@@ -54,14 +48,8 @@ export class ConfigPainelComponent implements OnInit {
   colors: string[];
   color: number;
   isGraphResponsive: boolean;
-  showGraph1: string;
-  showGraph2: string;
   performanceData: any;
   bestIndividualData: any;
-  wrightChildrenHistogram: number[];
-  wrightExpressions: any[];
-
-  //fitnessConstant: number;
 
   constructor() {}
 
@@ -74,7 +62,6 @@ export class ConfigPainelComponent implements OnInit {
     this.F = 0.5;
     this.numDifferenceVectors = 1;
     this.probCruzamento = 0.9;
-    this.probMutacao = 0.30;
     this.numOfVariables = 2;
     this.graphResolution = 10;
     this.populationSize = 100;
@@ -87,36 +74,11 @@ export class ConfigPainelComponent implements OnInit {
     this.numCurrentGeneration = 0;
     this.generations = [];
     this.isGraphResponsive = true;
-    this.showGraph1 = 'block';
-    this.showGraph2 = 'none';
     //this.initGensDataset();
     this.drawFunction();
-    this.couplesSelectionMode = "Torneio";
-    this.mutationMode = "Gene";
-    this.crossoverMode = "Wright";
     this.numOfIndividualsInTourney = 4;
-    
-    this.wrightExpressions = [
-      (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 0.5 * valueP2},
-      (valueP1: number, valueP2: number) => {return 1.5 * valueP1 - 0.5 * valueP2},
-      (valueP1: number, valueP2: number) => {return 0.5 * valueP1 + 1.5 * valueP2}
-    ]
 
-    //this.fitnessConstant = this.calcFitnessConstant();
   }
-
-  /*calcFitnessConstant(): number
-  {
-    let c3 = 0;
-
-    for (let i = 0; i < this.varConfigurations.length - 1; i++) {
-      let max = this.varConfigurations[i+1].intervalMax;
-      let min = this.varConfigurations[i].intervalMin;
-      c3 += this.b * (max * max) + (this.a - min) * (this.a - min);
-    }
-    console.log("c3", c3);
-    return c3;
-  }*/
 
   initConfigVars()
   {
@@ -132,31 +94,6 @@ export class ConfigPainelComponent implements OnInit {
       }
       this.varConfigurations.push(xConfig);
     }
-  }
-
-  /*numOfNewIndividual() 
-  {
-    let numOfNewIndividual: number;
-
-    if (this.checkBoxSelectedItens.indexOf("elitism") >= 0) 
-    {
-      numOfNewIndividual = this.populationSize - this.numOfElitismInd;
-    } 
-    else
-    {
-      numOfNewIndividual = this.populationSize;
-    }
-
-    return numOfNewIndividual;
-  }*/
-
-  initGensDataset() 
-  {
-    //console.log("initGensDataset");
-    this.initIntervalData();
-    ///////this.generationsDataSets = [];
-    this.color = 0;
-    this.colors = [];
   }
 
   initIntervalData() 
@@ -403,13 +340,9 @@ export class ConfigPainelComponent implements OnInit {
     this.startTime = performance.now();
 
     ///restarting the variables
-
-    //this.initGensDataset();
     this.initConfigVars();
     //this.fitnessConstant = this.calcFitnessConstant();
     this.drawFunction();
-
-    this.wrightChildrenHistogram = [0, 0, 0];
 
     this.generations = [];
 
@@ -599,22 +532,6 @@ export class ConfigPainelComponent implements OnInit {
     return array[this.getRamdomInt(array.length)];
   }
 
-  mountWrightHistogram(originalArray: individual[], selectedInd: individual[])
-  {
-    // for (let i = 0; i < originalArray.length; i++) {
-    //   if(selectedInd.includes(originalArray[i]))
-    //   {
-    //     this.wrightHistogram[i]++;
-    //   }      
-    // }
-    for (const indiv of selectedInd) {
-      let index = originalArray.indexOf(indiv);
-      //console.log("mountWrightHistogram index", index);
-      this.wrightChildrenHistogram[index]++;
-      //this.wrightChildrenHistogram.splice(index, 1, this.wrightChildrenHistogram[index] + 1);
-    }
-  }
-
   getTheBestIndividuos(individuals: individual[], numberOfIndividuals): individual[]
   {
     let ordered =  this.getDescendingFitnessPopulation(individuals);
@@ -720,34 +637,6 @@ export class ConfigPainelComponent implements OnInit {
       randVectors.push(population[randomIndex].vector);
     }
     return randVectors;
-  }
-
-  tryMutationInGenes(newVector: number[]): boolean
-  {
-    let mutationApplied = false;
-    for (let varIndex = 0; varIndex < newVector.length; varIndex++) 
-      {
-        if (Math.random() < this.probMutacao) 
-        {
-          //console.log("mutation in individual " + j + " vector " + k);
-          mutationApplied = true;
-          //console.log("before mutation" + indiv.vector[k].concat());
-          newVector[varIndex] = this.getRandomVarValue(varIndex);
-          //console.log("after mutation" + indiv.vector[k].concat());
-        }
-      }
-      return mutationApplied;
-  }
-
-  tryOneMutation(vector: number[]): boolean
-  {
-    if (Math.random() < this.probMutacao)
-    {
-      let mutationIndex = this.getRamdomInt(this.numOfVariables);
-      vector[mutationIndex] = this.getRandomVarValue(mutationIndex);
-      return true;
-    }
-    return false;
   }
 
   getRandomVarValue(varIndex: number)
