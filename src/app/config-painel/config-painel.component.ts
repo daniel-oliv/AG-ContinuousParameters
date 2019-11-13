@@ -77,11 +77,11 @@ export class ConfigPainelComponent implements OnInit {
     this.probMutacao = 0.30;
     this.numOfVariables = 2;
     this.graphResolution = 10;
-    this.populationSize = 80;
+    this.populationSize = 100;
     
     this.initConfigVars();
 
-    this.maxNumOfGenerations = 200;
+    this.maxNumOfGenerations = 500;
     this.bestInd = [];
     this.numOfBestToKeep = 5;
     this.numCurrentGeneration = 0;
@@ -127,8 +127,8 @@ export class ConfigPainelComponent implements OnInit {
         name: 'x'+(i+1),
         // intervalMin:-2,
         // intervalMax: 2
-        intervalMin: -5.12,
-        intervalMax: 5.12
+        intervalMin: -5,
+        intervalMax: 5
       }
       this.varConfigurations.push(xConfig);
     }
@@ -405,7 +405,7 @@ export class ConfigPainelComponent implements OnInit {
     ///restarting the variables
 
     //this.initGensDataset();
-    //this.initConfigVars();
+    this.initConfigVars();
     //this.fitnessConstant = this.calcFitnessConstant();
     this.drawFunction();
 
@@ -655,32 +655,36 @@ export class ConfigPainelComponent implements OnInit {
 
   applyDEMutation(population: individual[]) 
   {
-    //console.log("applyDEMutation");
+   //console.log("applyDEMutation population", population);
     let newChromosome;
     let u, v;
     //console.log("applyMutation");
     for (let j = 0; j < population.length; j++) 
     {
+     //console.log("ind: " + j);
       let indiv = population[j];
       newChromosome = [];
       // the number of random vectors include one to sum and 2 * numOfDif to calculate differences
       let randChromosomes = this.getRandomVectors(population, 1 + 2 * this.numDifferenceVectors, [j]);
-      //console.log("randChromosomes ", randChromosomes);
+     //console.log("randChromosomes ", randChromosomes);
       for (let i = 0; i < this.numOfVariables; i++) {
         // for every variable
         // perturbando um vetor com diferenças
-        //console.log("applyDEMutation i " + i);
+       //console.log("applyDEMutation i var " + i);
         
         v = randChromosomes[0][i];
+       //console.log("applyDEMutation rand1 value " + v);
         for (let dif = 0; dif < this.numDifferenceVectors; dif++) {
-          v += this.F * (randChromosomes[1+dif] + randChromosomes[1+ dif + this.numDifferenceVectors] )         
+          //console.log("applyDEMutation dif " + dif);
+          //console.log("applyDEMutation dif value " + (this.F * (randChromosomes[1+dif][i] )) );
+          v += this.F * (randChromosomes[1+dif][i] - randChromosomes[1+ dif + this.numDifferenceVectors][i] )         
         }
 
         if(!this.isInsideInterval(i, v))
         {
           //console.log("!isInsideInterval");
-          v = this.getRandomVarValue(i);
-          //v = indiv.chromosome[i];
+          //v = this.getRandomVarValue(i);
+          v = indiv.chromosome[i];
         }
 
         // cruzamento
@@ -697,14 +701,14 @@ export class ConfigPainelComponent implements OnInit {
 
       if (newIndividual.fitness < indiv.fitness) 
       {
-        population.splice(j, 1, this.getIndividual(newChromosome));
+        population.splice(j, 1, newIndividual);
       } 
     }
   }
 
   getRandomVectors(population: individual[], numOfVectors: number, indexesToExclude: number[] = []): number[]
   {
-    //console.log("indexesToExclude", indexesToExclude);
+   //console.log("indexesToExclude", indexesToExclude);
     let randVectors = [];
     while(randVectors.length < numOfVectors)
     {
