@@ -81,7 +81,7 @@ export class ConfigPainelComponent implements OnInit {
     
     this.initConfigVars();
 
-    this.maxNumOfGenerations = 500;
+    this.maxNumOfGenerations = 200;
     this.bestInd = [];
     this.numOfBestToKeep = 5;
     this.numCurrentGeneration = 0;
