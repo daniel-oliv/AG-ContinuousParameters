@@ -656,35 +656,35 @@ export class ConfigPainelComponent implements OnInit {
   applyDEMutation(population: individual[]) 
   {
    //console.log("applyDEMutation population", population);
-    let newChromosome;
+    let newVector;
     let u, v;
     //console.log("applyMutation");
     for (let j = 0; j < population.length; j++) 
     {
      //console.log("ind: " + j);
       let indiv = population[j];
-      newChromosome = [];
+      newVector = [];
       // the number of random vectors include one to sum and 2 * numOfDif to calculate differences
-      let randChromosomes = this.getRandomVectors(population, 1 + 2 * this.numDifferenceVectors, [j]);
-     //console.log("randChromosomes ", randChromosomes);
+      let randVectors = this.getRandomVectors(population, 1 + 2 * this.numDifferenceVectors, [j]);
+     //console.log("randVectors ", randVectors);
       for (let i = 0; i < this.numOfVariables; i++) {
         // for every variable
         // perturbando um vetor com diferenças
        //console.log("applyDEMutation i var " + i);
         
-        v = randChromosomes[0][i];
+        v = randVectors[0][i];
        //console.log("applyDEMutation rand1 value " + v);
         for (let dif = 0; dif < this.numDifferenceVectors; dif++) {
           //console.log("applyDEMutation dif " + dif);
-          //console.log("applyDEMutation dif value " + (this.F * (randChromosomes[1+dif][i] )) );
-          v += this.F * (randChromosomes[1+dif][i] - randChromosomes[1+ dif + this.numDifferenceVectors][i] )         
+          //console.log("applyDEMutation dif value " + (this.F * (randVectors[1+dif][i] )) );
+          v += this.F * (randVectors[1+dif][i] - randVectors[1+ dif + this.numDifferenceVectors][i] )         
         }
 
         if(!this.isInsideInterval(i, v))
         {
           //console.log("!isInsideInterval");
           //v = this.getRandomVarValue(i);
-          v = indiv.chromosome[i];
+          v = indiv.vector[i];
         }
 
         // cruzamento
@@ -692,12 +692,12 @@ export class ConfigPainelComponent implements OnInit {
         if(Math.random() <= this.probCruzamento || i === indexToCross){
           u = v;
         }else{
-          u = indiv.chromosome[i];
+          u = indiv.vector[i];
         }
-        newChromosome.push(u);
+        newVector.push(u);
       }
       
-      let newIndividual = this.getIndividual(newChromosome);
+      let newIndividual = this.getIndividual(newVector);
 
       if (newIndividual.fitness < indiv.fitness) 
       {
@@ -717,34 +717,34 @@ export class ConfigPainelComponent implements OnInit {
         randomIndex = this.getRamdomInt(population.length);
       }while(indexesToExclude.includes(randomIndex))
       indexesToExclude.push(randomIndex);
-      randVectors.push(population[randomIndex].chromosome);
+      randVectors.push(population[randomIndex].vector);
     }
     return randVectors;
   }
 
-  tryMutationInGenes(newChromosome: number[]): boolean
+  tryMutationInGenes(newVector: number[]): boolean
   {
     let mutationApplied = false;
-    for (let varIndex = 0; varIndex < newChromosome.length; varIndex++) 
+    for (let varIndex = 0; varIndex < newVector.length; varIndex++) 
       {
         if (Math.random() < this.probMutacao) 
         {
-          //console.log("mutation in individual " + j + " chromosome " + k);
+          //console.log("mutation in individual " + j + " vector " + k);
           mutationApplied = true;
-          //console.log("before mutation" + indiv.chromosome[k].concat());
-          newChromosome[varIndex] = this.getRandomVarValue(varIndex);
-          //console.log("after mutation" + indiv.chromosome[k].concat());
+          //console.log("before mutation" + indiv.vector[k].concat());
+          newVector[varIndex] = this.getRandomVarValue(varIndex);
+          //console.log("after mutation" + indiv.vector[k].concat());
         }
       }
       return mutationApplied;
   }
 
-  tryOneMutation(chromosome: number[]): boolean
+  tryOneMutation(vector: number[]): boolean
   {
     if (Math.random() < this.probMutacao)
     {
       let mutationIndex = this.getRamdomInt(this.numOfVariables);
-      chromosome[mutationIndex] = this.getRandomVarValue(mutationIndex);
+      vector[mutationIndex] = this.getRandomVarValue(mutationIndex);
       return true;
     }
     return false;
@@ -803,18 +803,18 @@ export class ConfigPainelComponent implements OnInit {
       //console.log("selectInitialPopulation: " + i);
       currentGeneration.push(
         ///note that we passe the bigChromossome size 2 * 10bits = 20bits 
-        this.getIndividual(this.getRandomChromosome())
+        this.getIndividual(this.getRandomVector())
       );
     }
     return currentGeneration;
   }
 
-  getIndividual(chromosome: number[]): individual {
+  getIndividual(vector: number[]): individual {
     //console.log("getIndividual");
     let ind: individual = {  };
-    ind.chromosome = chromosome.concat();
-    ind.fxn = this.functionToAnalise(ind.chromosome);
-    ind.fitness = this.calcFitness(ind.chromosome);
+    ind.vector = vector.concat();
+    ind.fxn = this.functionToAnalise(ind.vector);
+    ind.fitness = this.calcFitness(ind.vector);
 
     ///getting the best individuals
     this.evaluateIndividual(ind);
@@ -883,49 +883,49 @@ export class ConfigPainelComponent implements OnInit {
     let containsInd = false;
     /////// change if was more than 2 vars
     for (const oneOfTheBest of this.bestInd) {
-      if(oneOfTheBest.chromosome[0] == indiv.chromosome[0] && /////x1 
-         oneOfTheBest.chromosome[1] == indiv.chromosome[1] )  /////x2
+      if(oneOfTheBest.vector[0] == indiv.vector[0] && /////x1 
+         oneOfTheBest.vector[1] == indiv.vector[1] )  /////x2
          return true;
     }
     return containsInd;
   }
 
-  getRandomChromosome() 
+  getRandomVector() 
   {
-    let chromosome = [];
+    let vector = [];
     /// select 1 and 0 at random to get the binary number
     for (let i = 0; i < this.numOfVariables; i++)
-      chromosome.push(this.getRandomVarValue(i));
+      vector.push(this.getRandomVarValue(i));
 
-    //console.log("getRandomChromosome: " + chromosome);
+    //console.log("getRandomVector: " + vector);
 
-    return chromosome;
+    return vector;
   }
 
-  calcFitness(chromosome: number[]) 
+  calcFitness(vector: number[]) 
   {
     ///considering 0 to 1
     /// and that minFunctionInTheInterval is a negative number
-    //return (this.functionToAnalise(chromosome) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
+    //return (this.functionToAnalise(vector) - this.minFunctionInTheInterval) / (this.maxFunctionInTheInterval - this.minFunctionInTheInterval);
   
-    return (  this.functionToAnalise(chromosome)   );
+    return (  this.functionToAnalise(vector)   );
   }
 
-  // functionToAnalise(chromosome: number[]): number 
+  // functionToAnalise(vector: number[]): number 
   // {
-  //   const x1: number = chromosome[0];
-  //   const x2: number = chromosome[1];
+  //   const x1: number = vector[0];
+  //   const x2: number = vector[1];
   //   return this.functionToAnaliseNuns(x1, x2);
   // }
 
-  functionToAnalise(chromosome: number[]): number
+  functionToAnalise(vector: number[]): number
   {
     //console.log("functionToAnalise ")
     let fxn = 0;
-    //console.log(" chromosome.length ", chromosome.length);
-    for (let i = 0; i < chromosome.length - 1; i++) {
-      let x1 = chromosome[i];
-      let x2 = chromosome[i+1];
+    //console.log(" vector.length ", vector.length);
+    for (let i = 0; i < vector.length - 1; i++) {
+      let x1 = vector[i];
+      let x2 = vector[i+1];
       fxn += this.b * (x2-x1*x1) * (x2-x1*x1) + (this.a-x1) * (this.a-x1);
     }
     return fxn;
@@ -993,8 +993,8 @@ export class ConfigPainelComponent implements OnInit {
 }
 
 interface individual {
-  ///the chromosome representing all the variables - now containing real numbers
-  chromosome?: number[];
+  ///the array representing all the variables - now containing real numbers
+  vector?: number[];
   
   fxn?: number;
 
